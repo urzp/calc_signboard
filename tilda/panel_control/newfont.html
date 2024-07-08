@@ -1,0 +1,53 @@
+<style>
+    #font-file{
+        display: none;
+    }
+
+    .btn_new_font, .btn_new_font_save{
+        cursor: pointer;
+    }
+</style>
+
+<script>
+    let title_defalt = $('.new_font_title .tn-atom').text()
+
+    $('.btn_new_font').click(()=>{
+        $('#font-file').click()
+    })
+
+    $('#font-file').change(function(){
+        let name_file = $('#font-file').val()
+        name_file = name_file.split(/(\\|\/)/g).pop()
+        $('.new_font_title .tn-atom').text(name_file)
+    })
+
+    $('.btn_new_font_save').click(function(){
+	if (window.FormData === undefined) {
+		alert('В вашем браузере FormData не поддерживается')
+	} else {
+		var formData = new FormData();
+		formData.append('file', $("#font-file")[0].files[0]);
+ 
+		$.ajax({
+			type: "POST",
+			url: 'https://fancyneonservis.ru/php/newfont.php',
+			cache: false,
+			contentType: false,
+			processData: false,
+			data: formData,
+			dataType : 'json',
+			success: function(msg){
+                document.querySelector('input[type=file]').value = ''
+                $('.new_font_title .tn-atom').text(title_defalt)
+                $('.t-popup').click()
+				// if (msg.error == '') {
+				// 	$("#font-file").hide();
+				// 	$('#result').html(msg.success);
+				// } else {
+				// 	$('#result').html(msg.error);
+				// }
+			}
+		});
+	}
+});
+</script>
