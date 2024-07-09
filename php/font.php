@@ -2,6 +2,18 @@
 header('Access-Control-Allow-Origin: *');
 include 'crud.php';
 
+$type_function=$_POST['type_function'];
+
+if($type_function=='delete'){
+	crud_bd();
+	$data = array(
+		'success' => 'delete'
+	);
+	header('Content-Type: application/json');
+	echo json_encode($data, JSON_UNESCAPED_UNICODE);
+	exit();
+}
+
 // Название <input type="file">
 $input_name = 'file';
  
@@ -47,13 +59,31 @@ if (!isset($_FILES[$input_name])) {
 			// Перемещаем файл в директорию.
 			if (move_uploaded_file($file['tmp_name'], $path . $name)) {
 				// Далее можно сохранить название файла в БД и т.п.
-				$success = '<p style="color: green">Файл «' . $name . '» успешно загружен.</p>';
-                $data['name']= $name;
-                crud_create('fonts', $data);
+				$success = '<p style="color: green">Файл «' . $name .' '.$type_function. '» успешно загружен.</p>';
+				crud_bd();
 			} else {
 				$error = 'Не удалось загрузить файл.';
 			}
 		}
+	}
+}
+
+function crud_bd(){
+	global $type_function, $name;
+	if($type_function=='new'){
+		$data['name']= $name;
+		crud_create('fonts', $data);
+	}
+	if($type_function=='update'){
+		$data['name']= $name;
+		$id = $_POST['id_font'];
+		$selector = "`id` = '$id'";
+		crud_update('fonts', $data, $selector);
+	}
+	if($type_function=='delete'){
+		$id = $_POST['id_font'];
+		$selector = "`id` = '$id'";
+		crud_delete('fonts',$selector);
 	}
 }
  

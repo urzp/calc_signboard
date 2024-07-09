@@ -26,11 +26,12 @@
 		alert('В вашем браузере FormData не поддерживается')
 	} else {
 		var formData = new FormData();
+		formData.append('type_function', 'new')
 		formData.append('file', $("#font-file")[0].files[0]);
  
 		$.ajax({
 			type: "POST",
-			url: 'https://fancyneonservis.ru/php/newfont.php',
+			url: 'https://fancyneonservis.ru/php/font.php',
 			cache: false,
 			contentType: false,
 			processData: false,

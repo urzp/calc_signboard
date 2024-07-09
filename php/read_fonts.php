@@ -5,5 +5,4 @@ include 'crud.php';
 $fonts = crud_read('fonts');
 echo json_encode($fonts);
 
-
 ?>

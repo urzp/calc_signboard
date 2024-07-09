@@ -1,0 +1,53 @@
+<style>
+    .btn_reload_font, .btn_delete_font {
+        cursor: pointer;
+    }
+    #font-file-edit{
+        display: none;
+    }
+</style>
+
+<script>
+    $('.btn_reload_font').click(function(){
+        $('#font-file-edit').click()
+        console.log($(this).attr('id_font'))
+    })
+    $('.btn_delete_font').click(function(){
+        var formData = new FormData();
+        formData.append('type_function', 'delete')
+        formData.append('id_font', $('.btn_reload_font').attr('id_font'))
+        $.ajax({
+			type: "POST",
+			url: 'https://fancyneonservis.ru/php/font.php',
+			cache: false,
+			contentType: false,
+			processData: false,
+			data: formData,
+			dataType : 'json',
+			success: function(msg){
+                $('.t-popup').click()
+                renderPanel()
+			}
+		});
+    })
+
+    $('#font-file-edit').change(function(){
+        var formData = new FormData();
+        formData.append('type_function', 'update')
+        formData.append('id_font', $('.btn_reload_font').attr('id_font'))
+		formData.append('file', $("#font-file-edit")[0].files[0]);
+        
+        $.ajax({
+			type: "POST",
+			url: 'https://fancyneonservis.ru/php/font.php',
+			cache: false,
+			contentType: false,
+			processData: false,
+			data: formData,
+			dataType : 'json',
+			success: function(msg){
+                renderPanel()
+			}
+		});
+    })
+</script>
