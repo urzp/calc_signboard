@@ -8,6 +8,12 @@
 </style>
 
 <script>
+
+    $('.t-checkbox__control input').change(function(){
+        let check_val = $('.t-checkbox__control input').is(':checked')
+        console.log(check_val)
+    })
+
     $('.btn_reload_font').click(function(){
         $('#font-file-edit').click()
         console.log($(this).attr('id_font'))
