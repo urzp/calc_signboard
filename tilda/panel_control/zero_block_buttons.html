@@ -84,11 +84,13 @@
 		$('.font_button').each(function( index ){
 			let name_font = fonts[index]?fonts[index].name:''
 			let id_font = fonts[index]?fonts[index].id:''
+			let available = fonts[index]?Number(fonts[index].available):1
 			$(this).find('.tn-atom').text(name_font)
 			$(this).attr({font:name_font})
 			$(this).attr({id_font})
 			$(this).click( function(){
 				$('.edit_font_title .tn-atom').text(name_font)
+				$('.t-checkbox__control input').prop('checked', available)
 				$('.btn_reload_font').attr({id_font})
 				$('.btn_delete_font').attr({id_font})
 			})
