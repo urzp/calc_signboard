@@ -1,0 +1,20 @@
+<!-- Функции и настройки -->
+<script>
+    const URL_FONT = 'https://fancyneonservis.ru/php/font.php'
+
+
+    function ajax(url, formData, responce){
+        $.ajax({
+			type: "POST",
+			url,
+			cache: false,
+			contentType: false,
+			processData: false,
+			data: formData,
+			dataType : 'json',
+			success: function(msg){
+                responce()
+			}
+		});     
+    }
+</script>

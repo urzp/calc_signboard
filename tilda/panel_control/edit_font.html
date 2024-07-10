@@ -10,10 +10,9 @@
 <script>
     $(window).load(function(){
         $('.t-checkbox__control input').change(function(){
-        let check_val = $('.t-checkbox__control input').is(':checked')
-        console.log(check_val)
-    })
-
+            let check_val = $('.t-checkbox__control input').is(':checked')
+            console.log(check_val)
+        })
     })
 
     $('.btn_reload_font').click(function(){
@@ -24,19 +23,10 @@
         var formData = new FormData();
         formData.append('type_function', 'delete')
         formData.append('id_font', $('.btn_reload_font').attr('id_font'))
-        $.ajax({
-			type: "POST",
-			url: 'https://fancyneonservis.ru/php/font.php',
-			cache: false,
-			contentType: false,
-			processData: false,
-			data: formData,
-			dataType : 'json',
-			success: function(msg){
-                $('.t-popup').click()
-                renderPanel()
-			}
-		});
+        ajax(URL_FONT, formData, ()=>{ 
+            $('.t-popup').click(), 
+            renderPanel() 
+        })
     })
 
     $('#font-file-edit').change(function(){
@@ -44,18 +34,8 @@
         formData.append('type_function', 'update')
         formData.append('id_font', $('.btn_reload_font').attr('id_font'))
 		formData.append('file', $("#font-file-edit")[0].files[0]);
-        
-        $.ajax({
-			type: "POST",
-			url: 'https://fancyneonservis.ru/php/font.php',
-			cache: false,
-			contentType: false,
-			processData: false,
-			data: formData,
-			dataType : 'json',
-			success: function(msg){
-                renderPanel()
-			}
-		});
+        ajax(URL_FONT, formData, renderPanel)
     })
+
+
 </script>

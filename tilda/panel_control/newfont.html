@@ -28,22 +28,12 @@
 		var formData = new FormData();
 		formData.append('type_function', 'new')
 		formData.append('file', $("#font-file")[0].files[0]);
- 
-		$.ajax({
-			type: "POST",
-			url: 'https://fancyneonservis.ru/php/font.php',
-			cache: false,
-			contentType: false,
-			processData: false,
-			data: formData,
-			dataType : 'json',
-			success: function(msg){
-                document.querySelector('input[type=file]').value = ''
-                $('.new_font_title .tn-atom').text(title_defalt)
-                $('.t-popup').click()
-				renderPanel()
-			}
-		});
+        ajax(URL_FONT, formData, ()=>{ 
+            document.querySelector('input[type=file]').value = ''
+            $('.new_font_title .tn-atom').text(title_defalt)
+            $('.t-popup').click()
+            renderPanel()
+        })
 	}
 });
 </script>
