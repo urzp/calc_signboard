@@ -11,14 +11,19 @@
     $(window).load(function(){
         $('.t-checkbox__control input').change(function(){
             let check_val = $('.t-checkbox__control input').is(':checked')
-            console.log(check_val)
+            check_val = check_val?'1':'0'
+            let formData = new FormData();
+            formData.append('id_font', $('.btn_reload_font').attr('id_font'))
+            formData.append('type_function', 'use_switch')
+            formData.append('available', check_val)
+            ajax(URL_FONT, formData, renderPanel)
         })
     })
 
     $('.btn_reload_font').click(function(){
         $('#font-file-edit').click()
-        console.log($(this).attr('id_font'))
     })
+
     $('.btn_delete_font').click(function(){
         var formData = new FormData();
         formData.append('type_function', 'delete')

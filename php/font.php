@@ -4,15 +4,16 @@ include 'crud.php';
 
 $type_function=$_POST['type_function'];
 
-if($type_function=='delete'){
+if($type_function=='delete' || $type_function=='use_switch'){
 	crud_bd();
 	$data = array(
-		'success' => 'delete'
+		'success' => $type_function
 	);
 	header('Content-Type: application/json');
 	echo json_encode($data, JSON_UNESCAPED_UNICODE);
 	exit();
 }
+
 
 // Название <input type="file">
 $input_name = 'file';
@@ -84,6 +85,12 @@ function crud_bd(){
 		$id = $_POST['id_font'];
 		$selector = "`id` = '$id'";
 		crud_delete('fonts',$selector);
+	}
+	if($type_function=='use_switch'){
+		$data['available']= $_POST['available'];
+		$id = $_POST['id_font'];
+		$selector = "`id` = '$id'";
+		crud_update('fonts', $data, $selector);
 	}
 }
  
