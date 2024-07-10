@@ -5,7 +5,7 @@
 	.font_button{
 		cursor: pointer;
 	}
-	.font_panel{
+	.font_panel, .symbol_panel{
 		flex-wrap: wrap;
     	row-gap: 20px;
 	}
@@ -18,7 +18,7 @@
 
 	const zeroBlock = '.uc-hashtags' // имя класса для зеро блока
 	
-	const buttonsTarget = '.font_panel'  // имя класса для блока куда вставляются кнопки
+	let buttonsTarget  // имя класса для блока куда вставляются кнопки
 	const hTagTarget = '.js-product-controls-wrapper' // имя класса для блока куда вставляются хеш теги
 
 	const buttonStyles = { // стили для кнопок 
@@ -64,10 +64,11 @@
 	]
 
 	$( document ).ready( ()=>{
-		renderPanel()
+		 renderPanel()
 	})
 
 	async function renderPanel(){
+		buttonsTarget = '.font_panel'
 		await $('.font_button.clone').remove()
 		fonts = await ajaxReq(URL_FONTS, AJAX_OPTIONS, {})
 		buttons = []
@@ -78,6 +79,7 @@
 		await cloneHashTags()
 		await afterLoadElement('.js-product-controls-wrapper', cloneHashTags)
 		await setAttrButons(fonts)
+		renderSymbolPanel()
 	}
 
 	function setAttrButons(fonts){
@@ -95,6 +97,39 @@
 				$('.btn_delete_font').attr({id_font})
 			})
 		})
+	}
+
+	async function renderSymbolPanel(){
+		buttonsTarget = '.symbol_panel'
+		await $('.symbol_button.clone').remove()
+		symbols = await ajaxReq(URL_SYMBOLS, AJAX_OPTIONS, {})
+		buttons = []
+		symbols.forEach(()=>{
+			buttons.push('.symbol_button')
+		})
+		await cloneButtons()
+		await cloneHashTags()
+		await afterLoadElement('.js-product-controls-wrapper', cloneHashTags)
+		await setAttrButonsSymbol(symbols)
+	}
+
+	function setAttrButonsSymbol(symbols){
+		$('.symbol_button.clone').each(function( index ){
+			let id_symbol = symbols[index].id
+			let symbol = symbols[index].name
+			$(this).find('.tn-atom').text(symbol)
+			$(this).click( function(){
+				$('input[name="Символ"]').val(symbol)
+				$('.btn_edit_symbol_save').attr({id_symbol})
+			})
+		})
+	}
+
+	function fillSymbolPupap(symbol){
+		let html_item = `<div calss='item_font'>
+    						<div class='title_font'></div>
+    						<input type='number'/>
+						</div>`
 	}
 
 	function afterLoadElement(cssSelector, callBack){

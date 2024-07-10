@@ -1,0 +1,14 @@
+<script>
+    $('.btn_new_symbol_save').click(()=>{
+        let symbol = $('input[name="Введите символ"]').val()
+        if(!symbol) return false
+        var formData = new FormData();
+		formData.append('type_function', 'new')
+        formData.append('symbol', symbol)
+        ajax(URL_SYMBOL, formData, ()=>{
+            $('input[name="Введите символ"]').val('')
+            $('.t-popup').click()
+            renderPanel()
+        })
+    })
+</script>

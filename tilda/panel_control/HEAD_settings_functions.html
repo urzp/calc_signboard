@@ -2,11 +2,13 @@
 <script>
     const URL_FONT = 'https://fancyneonservis.ru/php/font.php'
 	const URL_FONTS = 'https://fancyneonservis.ru/php/read_fonts.php'
+    const URL_SYMBOL = 'https://fancyneonservis.ru/php/symbol.php'
+    const URL_SYMBOLS = 'https://fancyneonservis.ru/php/read_symbols.php'
 	const AJAX_OPTIONS = {
         type: 'POST',
         headers: { 'Content-Type': 'application/json;charset=utf-8' },
     }
-	let fonts
+	let fonts, symbols
 
 
     function ajax(url, formData, responce){
