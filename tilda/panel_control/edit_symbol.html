@@ -10,6 +10,7 @@
         formData.append('type_function', 'update')
         formData.append('id', $('.btn_edit_symbol_save').attr('id_symbol'))
         formData.append('symbol', $('input[name="Символ"]').val())
+        formData.append('sub_panel', $('input[name="grope"]').val())
         symbol_fonts = []
         $('.item_font').each(function(){
             let id = $(this).attr('id_font')

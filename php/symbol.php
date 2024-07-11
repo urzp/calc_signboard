@@ -17,6 +17,7 @@ function crud_bd(){
     if($type_function=='update'){
         $id = $_POST['id'];
         $data['name']=$_POST['symbol'];
+        $data['sub_panel']=$_POST['sub_panel'];
         $selector = "`id` = '$id'";
         crud_update('symbols', $data, $selector);
         $symbol_fonts = json_decode($_POST['symbol_fonts']);

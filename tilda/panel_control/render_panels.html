@@ -132,13 +132,18 @@
 	}
 
 	function setAttrButonsSymbol(symbols){
+		let title_def = $('.title_popap_symbol .tn-atom').text()
 		$('.symbol_button.clone').each(function( index ){
 			let id_symbol = symbols[index].id
 			let symbol = symbols[index].name
+			let sub_panel = symbols[index].sub_panel
 			$(this).find('.tn-atom').text(symbol)
 			$(this).click( function(){
 				$('.btn_edit_symbol_save').attr({'id_symbol':symbol.id})
+				new_title = title_def + " " + symbol
+				$('.title_popap_symbol .tn-atom').text(new_title)
 				$('input[name="Символ"]').val(symbol)
+				$('input[name="grope"]').val(sub_panel)
 				$('.btn_edit_symbol_save').attr({id_symbol})
 				fillSymbolPupap(symbols[index])
 			})
