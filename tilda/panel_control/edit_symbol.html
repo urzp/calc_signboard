@@ -1,0 +1,43 @@
+<style>
+    .btn_edit_symbol_save, .btn_delete_symbol {
+        cursor: pointer;
+    }
+</style>
+
+<script>
+    $('.btn_edit_symbol_save').click(function(){
+        let formData = new FormData();
+        formData.append('type_function', 'update')
+        formData.append('id', $('.btn_edit_symbol_save').attr('id_symbol'))
+        formData.append('symbol', $('input[name="Символ"]').val())
+        symbol_fonts = []
+        $('.item_font').each(function(){
+            let id = $(this).attr('id_font')
+            let length = $(this).find('input').val()
+            length = length?length:'-'
+            let font = {id, length }
+            symbol_fonts.push(font)
+        })
+        formData.append('symbol_fonts', JSON.stringify(symbol_fonts))
+        ajax(URL_SYMBOL, formData, ()=>{ 
+            $('.t-popup').click(), 
+            renderPanel() 
+        })
+    })
+    $('.btn_delete_symbol').click(function(){
+        let formData = new FormData();
+        formData.append('type_function', 'delete')       
+        formData.append('id', $('.btn_edit_symbol_save').attr('id_symbol'))
+        symbol_fonts = []
+        $('.item_font').each(function(){
+            let id = $(this).attr('id_font')
+            let font = {id}
+            symbol_fonts.push(font)
+        })
+        formData.append('symbol_fonts', JSON.stringify(symbol_fonts))
+        ajax(URL_SYMBOL, formData, ()=>{ 
+            $('.t-popup').click(), 
+            renderPanel() 
+        })
+    })
+</script>

@@ -14,6 +14,33 @@ function crud_bd(){
             crud_create('symbols', $data);
         }
 	}
+    if($type_function=='update'){
+        $id = $_POST['id'];
+        $data['name']=$_POST['symbol'];
+        $selector = "`id` = '$id'";
+        crud_update('symbols', $data, $selector);
+        $symbol_fonts = json_decode($_POST['symbol_fonts']);
+        $data = [];
+        foreach($symbol_fonts as $font){
+            $id_font =  $font -> id;
+            $length = $font -> length;
+            $data['length'] = $length;
+            $selector = "`id_font` = '$id_font' AND `id_symbol` = '$id' ";
+            crud_update('subol_trace_length', $data, $selector);
+        }
+    }
+    if($type_function=='delete'){
+        $id = $_POST['id'];
+        $selector = "`id` = '$id'";
+        crud_delete('symbols', $selector);
+        $symbol_fonts = json_decode($_POST['symbol_fonts']);
+        $data = [];
+        foreach($symbol_fonts as $font){
+            $id_font =  $font -> id;
+            $selector = "`id_font` = '$id_font' AND `id_symbol` = '$id' ";
+            crud_delete('subol_trace_length', $selector);
+        }
+    }
 }
 
 function mb_str_split($str){

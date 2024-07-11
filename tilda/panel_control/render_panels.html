@@ -137,6 +137,7 @@
 			let symbol = symbols[index].name
 			$(this).find('.tn-atom').text(symbol)
 			$(this).click( function(){
+				$('.btn_edit_symbol_save').attr({'id_symbol':symbol.id})
 				$('input[name="Символ"]').val(symbol)
 				$('.btn_edit_symbol_save').attr({id_symbol})
 				fillSymbolPupap(symbols[index])
@@ -149,7 +150,7 @@
 		let fonts_symbol = symbol.fonts
 		fonts_symbol.forEach((item)=>{
 			if(item.available=='1'){
-				let html_item = `<div class='item_font'>
+				let html_item = `<div class='item_font' id_font="${item.id}">
     								<div class='title_font'>${item.name}</div>
     								<input type='number' value='${Number(item.length)}'/>
 								</div>`
