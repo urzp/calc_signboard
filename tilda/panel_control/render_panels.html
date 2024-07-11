@@ -5,9 +5,22 @@
 	.font_button{
 		cursor: pointer;
 	}
-	.font_panel, .symbol_panel{
+	.font_panel{
+		display: flex;
 		flex-wrap: wrap;
     	row-gap: 20px;
+	}
+	.font_off{
+		opacity: 0.5;
+	}
+	.symbol_panel{
+		display: flex;
+		flex-direction: column;
+		row-gap: 50px;
+	}
+	.sub_panel{
+		flex-wrap: wrap;
+    	row-gap: 20px;		
 	}
 	.list_fonts_length .item_font{
 		display: flex;
@@ -25,6 +38,18 @@
 		height: 20px;
 		text-align: center;
 		border-radius: 8px;
+	}
+	.bt_check_symbols{
+		cursor: pointer;
+	}
+	.checked_ok{
+		border-color: #00ff06!important;
+		background-color: #076101!important;
+	}
+
+	.checked_fall{
+		border-color: #ff0000!important;
+		background-color: #5d0000!important;
 	}
 
 </style>
@@ -85,6 +110,11 @@
 		 renderPanel()
 	})
 
+	$('.bt_check_symbols').click(()=>{
+		check_symbols = !check_symbols
+		renderPanel()
+	})
+
 	async function renderPanel(){
 		buttonsTarget = '.font_panel'
 		await $('.font_button.clone').remove()
@@ -97,7 +127,34 @@
 		await cloneHashTags()
 		await afterLoadElement('.js-product-controls-wrapper', cloneHashTags)
 		await setAttrButons(fonts)
-		renderSymbolPanel()
+		await renderSymbolPanel()
+		ajastHeights()
+	}
+
+	function ajastHeights(){
+		let riseHeight
+		riseHeight = getRiseBlock('.length_panel_wrap')
+		setRiseBlock('.bg_pupap_symbol_panel', riseHeight)
+		riseHeight = getRiseBlock('.symbol_wrap_panel')
+		setRiseBlock('.bg_symbol_panel', riseHeight)
+		setRiseBlock('.uc-symbolPanel .t396__artboard', riseHeight)
+	}
+
+	function setRiseBlock(cssName, value){
+		let defHight = Number($(cssName).attr('data-field-height-value'))
+		defHight = defHight?defHight:Number($(cssName).attr('data-artboard-height'))
+		let newHieght = defHight + value
+		$(cssName).css({height:newHieght+'px'})
+	}
+
+	function getRiseBlock(cssName){
+		return $(cssName).height() - Number($(cssName).attr('data-field-height-value'))
+	}
+
+	function getBottomTPadding(cssNameBg, cssNameBlock){
+		let y_bottomBG = $(cssNameBg).offset().top + Number( $(cssNameBg).attr('data-field-height-value') )
+		let y_bottomBlock = $(cssNameBlock).offset().top + Number( $(cssNameBlock).attr('data-field-height-value') )
+		return y_bottomBG - y_bottomBlock
 	}
 
 	function setAttrButons(fonts){
@@ -106,6 +163,7 @@
 			let id_font = fonts[index]?fonts[index].id:''
 			let available = fonts[index]?Number(fonts[index].available):1
 			$(this).find('.tn-atom').text(name_font)
+			if(available == 0) $(this).find('.tn-atom').addClass('font_off')
 			$(this).attr({font:name_font})
 			$(this).attr({id_font})
 			$(this).click( function(){
@@ -118,17 +176,33 @@
 	}
 
 	async function renderSymbolPanel(){
-		buttonsTarget = '.symbol_panel'
 		await $('.symbol_button.clone').remove()
 		symbols = await ajaxReq(URL_SYMBOLS, AJAX_OPTIONS, {})
-		buttons = []
-		symbols.forEach(()=>{
-			buttons.push('.symbol_button')
-		})
-		await cloneButtons()
+		let countPanels = await Math.max.apply(null,symbols.map(function(item){return item.sub_panel}))
+		await setSubPanels(symbols, countPanels);
+		for(let i=1; i<=countPanels; i++){
+			buttons = []
+			buttonsTarget = `.sub_panel_${i}`
+			let symbols_groupe = symbols.filter(function(item){
+				return(item.sub_panel==i)
+			})
+			symbols_groupe.forEach(()=>{
+				buttons.push('.symbol_button')
+			})
+			await cloneButtons()
+		}
 		await cloneHashTags()
 		await afterLoadElement('.js-product-controls-wrapper', cloneHashTags)
 		await setAttrButonsSymbol(symbols)
+	}
+
+	function setSubPanels(symbols, countPanels){
+		let html_item
+		$('.sub_panel').remove();
+		for(let i=1; i<=countPanels; i++){
+			html_item = `<div class='sub_panel sub_panel_${i}'></div>`
+			$('.symbol_panel').append(html_item)
+		}
 	}
 
 	function setAttrButonsSymbol(symbols){
@@ -138,6 +212,13 @@
 			let symbol = symbols[index].name
 			let sub_panel = symbols[index].sub_panel
 			$(this).find('.tn-atom').text(symbol)
+			if(check_symbols){
+				if(symbols[index].fonts.some((el)=>{return el.available==1&&el.length=='-'})){
+					$(this).find('.tn-atom').addClass('checked_fall')
+				}else{
+					$(this).find('.tn-atom').addClass('checked_ok')
+				}
+			}
 			$(this).click( function(){
 				$('.btn_edit_symbol_save').attr({'id_symbol':symbol.id})
 				new_title = title_def + " " + symbol
@@ -146,6 +227,7 @@
 				$('input[name="grope"]').val(sub_panel)
 				$('.btn_edit_symbol_save').attr({id_symbol})
 				fillSymbolPupap(symbols[index])
+				setTimeout( ajastHeights, 300)
 			})
 		})
 	}
