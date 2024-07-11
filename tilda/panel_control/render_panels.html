@@ -9,6 +9,24 @@
 		flex-wrap: wrap;
     	row-gap: 20px;
 	}
+	.list_fonts_length .item_font{
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-top: 10px;
+	}
+	.list_fonts_length .title_font{
+		color: #fff;
+	}
+	.list_fonts_length input{
+		color: #000000;
+		background-color: #d2d2d2;
+		width: 60px;
+		height: 20px;
+		text-align: center;
+		border-radius: 8px;
+	}
+
 </style>
 
 <script>
@@ -121,15 +139,25 @@
 			$(this).click( function(){
 				$('input[name="Символ"]').val(symbol)
 				$('.btn_edit_symbol_save').attr({id_symbol})
+				fillSymbolPupap(symbols[index])
 			})
 		})
 	}
 
 	function fillSymbolPupap(symbol){
-		let html_item = `<div calss='item_font'>
-    						<div class='title_font'></div>
-    						<input type='number'/>
-						</div>`
+		$('.list_fonts_length .item_font').remove();
+		let fonts_symbol = symbol.fonts
+		fonts_symbol.forEach((item)=>{
+			if(item.available=='1'){
+				let html_item = `<div class='item_font'>
+    								<div class='title_font'>${item.name}</div>
+    								<input type='number' value='${Number(item.length)}'/>
+								</div>`
+				$( ".list_fonts_length" ).append(html_item)
+			}
+
+		})
+
 	}
 
 	function afterLoadElement(cssSelector, callBack){
