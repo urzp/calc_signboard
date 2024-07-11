@@ -6,8 +6,8 @@
 
 <script>
     $('.btn_new_symbol_save').click(()=>{
-        let symbol = $('input[name="Введите символ"]').val()
-        let sub_panel = $('input[name="Группа символ(лы)"]').val()
+        let symbol = $('input[name="new_symbol"]').val()
+        let sub_panel = $('input[name="new_symbol_sub_panel"]').val()
         if(!symbol) return false
         var formData = new FormData();
 		formData.append('type_function', 'new')
