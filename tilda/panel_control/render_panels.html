@@ -30,7 +30,7 @@
 </style>
 
 <script>
-
+	let title_def
 	let buttons = [ ] //имена классов элементов для кнопок перечисленные через запятую в кавычках. Точка в переди обязатено нужна 
 	const hashTags = [ ] //имена классов элементов для хештегов перечисленные через запятую в кавычках. Точка в переди обязатено нужна 
 
@@ -132,7 +132,7 @@
 	}
 
 	function setAttrButonsSymbol(symbols){
-		let title_def = $('.title_popap_symbol .tn-atom').text()
+		if(!title_def) title_def = $('.title_popap_symbol .tn-atom').text()
 		$('.symbol_button.clone').each(function( index ){
 			let id_symbol = symbols[index].id
 			let symbol = symbols[index].name

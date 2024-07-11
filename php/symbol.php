@@ -7,9 +7,11 @@ $test=[];
 function crud_bd(){
 	global $type_function, $test;
 	if($type_function=='new'){
+        $sub_panel = $_POST['sub_panel'];
         $symbols = mb_str_split($_POST['symbol']);
         foreach ($symbols as $char){
             $data['name'] = $char;
+            $data['sub_panel'] = $sub_panel;
             array_push($test, $char);
             crud_create('symbols', $data);
         }
