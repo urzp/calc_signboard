@@ -8,9 +8,27 @@
 </style>
 
 <script>
+    let fonts;
+	const URL_FONTS = 'https://fancyneonservis.ru/php/read_fonts.php'
+    const AJAX_OPTIONS = {
+        type: 'POST',
+        headers: { 'Content-Type': 'application/json;charset=utf-8' },
+    }
+
     $( document ).ready(function(){
-        initColorPanel()
+        init()
     })
+
+    async function init(){
+        initColorPanel()
+        ready_t_element( '.border_orintation_panel', ()=>{
+            border_orintation_action()
+            $('.t-input-group').click(function(){
+                border_orintation_action()
+            })
+        })
+        fonts = await ajaxReq(URL_FONTS, AJAX_OPTIONS, {})
+    }
 
     function initColorPanel(){
         for(let i=0;i<=14;i++){
@@ -24,6 +42,37 @@
             let indexColor = $(this).attr('indexColor')
             $(`.select_color_${indexColor}`).css({'opacity':'1.0'})
         })
+    }
+
+    function ready_t_element(css_selector, action){
+        let id_timer = setInterval(()=>{
+            if($(css_selector).length > 0){
+                action()
+                clearInterval( id_timer )
+            } 
+        }, 300)
+    }
+
+    function border_orintation_action(){
+        if($('[value="Горизонтальная"]').is(':checked')){
+            $('[value="Горизонтальная"]').parent().find('span').css({'color':'#fff'})
+        }else{
+            $('[value="Горизонтальная"]').parent().find('span').css({'color':'#555'})
+        }
+        if($('[value="Вертикальная"]').is(':checked')){
+            $('[value="Вертикальная"]').parent().find('span').css({'color':'#fff'})
+        }else{
+            $('[value="Вертикальная"]').parent().find('span').css({'color':'#555'})
+        }
+    }
+
+	async function ajaxReq(url, options, content){
+        let response = await fetch(url,{
+            method: options.type,
+            headers: options.heders,
+            body: JSON.stringify(content)
+        })
+        return await response.json();
     }
     
     
