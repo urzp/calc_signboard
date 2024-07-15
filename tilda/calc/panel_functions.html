@@ -1,0 +1,30 @@
+<style>
+    .select_color{
+        opacity: 0.01;
+    }
+    .btn_color{
+        cursor: pointer;
+    }
+</style>
+
+<script>
+    $( document ).ready(function(){
+        initColorPanel()
+    })
+
+    function initColorPanel(){
+        for(let i=0;i<=14;i++){
+            $(`.select_color_${i}`).addClass('select_color')
+            $(`.btn_color_${i}`).addClass('btn_color')
+            $(`.btn_color_${i}`).attr({'indexColor':i})
+        }
+        
+        $('.btn_color').click(function(){
+            $(`.select_color`).css({'opacity':'0.0'})
+            let indexColor = $(this).attr('indexColor')
+            $(`.select_color_${indexColor}`).css({'opacity':'1.0'})
+        })
+    }
+    
+    
+</script>
