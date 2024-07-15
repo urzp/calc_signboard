@@ -2,14 +2,20 @@
     .select_color{
         opacity: 0.01;
     }
-    .btn_color{
+    .btn_color, .btn_font{
         cursor: pointer;
+    }
+    .btn_font_selected .tn-atom{
+        color: #fff!important;
+        border-color: #78ddf4!important;
+        background-color: #03a3df!important;
     }
 </style>
 
 <script>
-    let fonts;
+    let fonts, symbols;
 	const URL_FONTS = 'https://fancyneonservis.ru/php/read_fonts.php'
+    const URL_SYMBOLS = 'https://fancyneonservis.ru/php/read_symbols.php'
     const AJAX_OPTIONS = {
         type: 'POST',
         headers: { 'Content-Type': 'application/json;charset=utf-8' },
@@ -20,14 +26,29 @@
     })
 
     async function init(){
+        initFontsPanel()
         initColorPanel()
-        ready_t_element( '.border_orintation_panel', ()=>{
-            border_orintation_action()
-            $('.t-input-group').click(function(){
-                border_orintation_action()
-            })
-        })
+        initBorderOrintation()
+        initSymbols()
+    }
+
+    async function initSymbols(){
+        symbols = await ajaxReq(URL_SYMBOLS, AJAX_OPTIONS, {})
+    }
+
+    async function initFontsPanel(){
         fonts = await ajaxReq(URL_FONTS, AJAX_OPTIONS, {})
+        for(let i=1;i<=10;i++){
+            let fontName = fonts[i-1].name
+            $(`.btn_font_${i}`).addClass('btn_font')
+            $(`.btn_font_${i}`).attr({'font':fontName})
+            $(`.btn_font_${i} .tn-atom`).text(fontName.split('.')[0])
+        }
+        $('.btn_font').click(function(){
+            $('.btn_font').removeClass('btn_font_selected')
+            $(this).addClass('btn_font_selected')
+        })
+        $('.btn_font_1').click()
     }
 
     function initColorPanel(){
@@ -41,6 +62,15 @@
             $(`.select_color`).css({'opacity':'0.0'})
             let indexColor = $(this).attr('indexColor')
             $(`.select_color_${indexColor}`).css({'opacity':'1.0'})
+        })
+    }
+
+    function initBorderOrintation(){
+        ready_t_element( '.border_orintation_panel', ()=>{
+            border_orintation_action()
+            $('.t-input-group').click(function(){
+                border_orintation_action()
+            })
         })
     }
 
