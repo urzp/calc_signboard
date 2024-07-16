@@ -13,9 +13,11 @@
 </style>
 
 <script>
-    let fonts, symbols;
+    let fonts, font_files = [], symbols, canvas, ctx;
+    let selctedColor, selectedFont, text_board = 'Текст'
 	const URL_FONTS = 'https://fancyneonservis.ru/php/read_fonts.php'
     const URL_SYMBOLS = 'https://fancyneonservis.ru/php/read_symbols.php'
+    const URL_FONTS_FILE = 'https://fancyneonservis.ru/fonts/getFont.php'
     const AJAX_OPTIONS = {
         type: 'POST',
         headers: { 'Content-Type': 'application/json;charset=utf-8' },
@@ -26,10 +28,54 @@
     })
 
     async function init(){
+        await initCanvas()
+        initTextImput()
         initFontsPanel()
         initColorPanel()
         initBorderOrintation()
         initSymbols()
+    }
+
+    function initCanvas(){
+        canvas = document.getElementById("canvas");
+        ctx = canvas.getContext("2d")
+        canvas.width = $('#canvas').parent().width()
+        canvas.height = $('#canvas').parent().height()
+    }
+
+    function initTextImput(){
+        ready_t_element( '[name="text_board"]', ()=>{
+            $('[name="text_board"]').on( 'input', function(){
+                text_board = $(this).val()
+                renderCanvas()
+            })
+        })
+    }
+
+    function renderCanvas(){
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ajastWidthText()
+        ctx.fillStyle = selctedColor;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text_board, canvas.width/2, canvas.height/2);
+    }
+
+    function ajastWidthText(){
+        let textWidth, textSize = 70, maxTextWidth = 400, minTextWidth = 150, minTextHigth = 40
+        ctx.font = `${textSize}px ${selectedFont}`
+        textWidth = ctx.measureText(text_board).width
+        textHeight = ctx.measureText(text_board).actualBoundingBoxAscent + ctx.measureText(text_board).actualBoundingBoxDescent
+        while( textWidth > maxTextWidth ){
+            ctx.font = `${textSize}px ${selectedFont}`;
+            textWidth = ctx.measureText(text_board).width
+            textSize--
+        }
+        while( textWidth < minTextWidth ){
+            ctx.font = `${textSize}px ${selectedFont}`;
+            textWidth = ctx.measureText(text_board).width
+            textSize++
+        }
     }
 
     async function initSymbols(){
@@ -41,14 +87,25 @@
         for(let i=1;i<=10;i++){
             let fontName = fonts[i-1].name
             $(`.btn_font_${i}`).addClass('btn_font')
-            $(`.btn_font_${i}`).attr({'font':fontName})
+            $(`.btn_font_${i}`).attr({'font':fontName.split('.')[0]})
             $(`.btn_font_${i} .tn-atom`).text(fontName.split('.')[0])
         }
         $('.btn_font').click(function(){
             $('.btn_font').removeClass('btn_font_selected')
             $(this).addClass('btn_font_selected')
+            selectedFont = $(this).attr('font')
+            renderCanvas()
         })
         $('.btn_font_1').click()
+
+        fonts.forEach(async function(el){
+            let fontFace = new FontFace(el.name.split(".")[0], `url(${URL_FONTS_FILE}?font=${el.name})`)
+            await fontFace.load().then(function(font){
+                //console.log('font ready');
+                document.fonts.add(font);
+                font_files.push(fontFace)
+            });
+        })
     }
 
     function initColorPanel(){
@@ -62,7 +119,11 @@
             $(`.select_color`).css({'opacity':'0.0'})
             let indexColor = $(this).attr('indexColor')
             $(`.select_color_${indexColor}`).css({'opacity':'1.0'})
+            selctedColor = $(`.btn_color_${indexColor} .tn-atom`).css('background-color')
+            renderCanvas()
         })
+
+        $('.btn_color_1').click()
     }
 
     function initBorderOrintation(){
