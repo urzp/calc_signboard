@@ -10,11 +10,15 @@
         border-color: #78ddf4!important;
         background-color: #03a3df!important;
     }
+    .btn_zoom_plus, .btn_zoom_reset, .btn_zoom_minus{
+        cursor: pointer;
+    }
 </style>
 
 <script>
     let fonts, font_files = [], symbols, canvas, ctx;
-    let selctedColor, selectedFont, text_board = 'Текст'
+    let selctedColor, textBaseSize = 50, zoom = 0, zoomGap = 5, selectedFont, text_board = 'Текст', borderHorizont
+    let blur_2 = 50, blur_opacity = 0.7
 	const URL_FONTS = 'https://fancyneonservis.ru/php/read_fonts.php'
     const URL_SYMBOLS = 'https://fancyneonservis.ru/php/read_symbols.php'
     const URL_FONTS_FILE = 'https://fancyneonservis.ru/fonts/getFont.php'
@@ -34,6 +38,7 @@
         initColorPanel()
         initBorderOrintation()
         initSymbols()
+        initZommPanel()
     }
 
     function initCanvas(){
@@ -54,28 +59,67 @@
 
     function renderCanvas(){
         ctx.clearRect(0, 0, canvas.width, canvas.height)
+        if(borderHorizont) horizontalBoard()
+    }
+
+    function horizontalBoard(){
         ajastWidthText()
         ctx.fillStyle = selctedColor;
+        ctx.shadowColor = selctedColor;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+        ctx.shadowBlur = 20;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
+        ctx.fillText(text_board, canvas.width/2, canvas.height/2);
+        ctx.strokeStyle = selctedColor;
+        ctx.strokeText(text_board, canvas.width/2, canvas.height/2);
+        let blur_2_color = selctedColor.split(")")[0] + ', ' + blur_opacity +')'
+        ctx.shadowColor = blur_2_color;
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 0;
+        ctx.shadowBlur = blur_2;  
+        ctx.fillText(text_board, canvas.width/2, canvas.height/2);
+        ctx.shadowOffsetX = -2;
+        ctx.shadowOffsetY = 0;
+        ctx.shadowBlur = blur_2;  
+        ctx.fillText(text_board, canvas.width/2, canvas.height/2);
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 2;
+        ctx.shadowBlur = blur_2;  
+        ctx.fillText(text_board, canvas.width/2, canvas.height/2);
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = -2;
+        ctx.shadowBlur = blur_2;  
         ctx.fillText(text_board, canvas.width/2, canvas.height/2);
     }
 
     function ajastWidthText(){
-        let textWidth, textSize = 70, maxTextWidth = 400, minTextWidth = 150, minTextHigth = 40
+        let textWidth, textSize, maxTextWidth = 450
+        textSize =  Number(textBaseSize) + Number(zoom)
         ctx.font = `${textSize}px ${selectedFont}`
         textWidth = ctx.measureText(text_board).width
-        textHeight = ctx.measureText(text_board).actualBoundingBoxAscent + ctx.measureText(text_board).actualBoundingBoxDescent
-        while( textWidth > maxTextWidth ){
+        textHeight = ctx.measureText(text_board).hangingBaseline
+        while( textWidth > maxTextWidth && zoom==0){
             ctx.font = `${textSize}px ${selectedFont}`;
             textWidth = ctx.measureText(text_board).width
             textSize--
         }
-        while( textWidth < minTextWidth ){
-            ctx.font = `${textSize}px ${selectedFont}`;
-            textWidth = ctx.measureText(text_board).width
-            textSize++
-        }
+    }
+
+    function initZommPanel(){
+        $('.btn_zoom_plus').click(()=>{
+            zoom = zoom + zoomGap;
+            renderCanvas()
+        })
+        $('.btn_zoom_minus').click(()=>{
+            zoom = zoom - zoomGap;
+            renderCanvas()
+        })
+        $('.btn_zoom_reset').click(()=>{
+            zoom=0;
+            renderCanvas()
+        })
     }
 
     async function initSymbols(){
@@ -86,14 +130,17 @@
         fonts = await ajaxReq(URL_FONTS, AJAX_OPTIONS, {})
         for(let i=1;i<=10;i++){
             let fontName = fonts[i-1].name
+            let font = fonts[i-1]
             $(`.btn_font_${i}`).addClass('btn_font')
             $(`.btn_font_${i}`).attr({'font':fontName.split('.')[0]})
             $(`.btn_font_${i} .tn-atom`).text(fontName.split('.')[0])
+            $(`.btn_font_${i}`).attr({'font_base_size':font.baseSize})
         }
         $('.btn_font').click(function(){
             $('.btn_font').removeClass('btn_font_selected')
             $(this).addClass('btn_font_selected')
             selectedFont = $(this).attr('font')
+            textBaseSize = $(this).attr('font_base_size')
             renderCanvas()
         })
         $('.btn_font_1').click()
@@ -147,14 +194,17 @@
     function border_orintation_action(){
         if($('[value="Горизонтальная"]').is(':checked')){
             $('[value="Горизонтальная"]').parent().find('span').css({'color':'#fff'})
+            borderHorizont = true
         }else{
             $('[value="Горизонтальная"]').parent().find('span').css({'color':'#555'})
+            borderHorizont = false
         }
         if($('[value="Вертикальная"]').is(':checked')){
             $('[value="Вертикальная"]').parent().find('span').css({'color':'#fff'})
         }else{
             $('[value="Вертикальная"]').parent().find('span').css({'color':'#555'})
         }
+        renderCanvas()
     }
 
 	async function ajaxReq(url, options, content){
