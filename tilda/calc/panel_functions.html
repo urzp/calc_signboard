@@ -63,6 +63,7 @@
                 startSymbolYpos = startSymbolYpos + metrics.actualBoundingBoxAscent
                 this.fillText(text[i], x, y + ( startSymbolYpos ));
                 startSymbolYpos = startSymbolYpos + metrics.actualBoundingBoxDescent + verticalSpacing
+                if(text[i]==" ") startSymbolYpos = startSymbolYpos + verticalSpacing * 5
             }
         }
     }
@@ -271,6 +272,7 @@
         for (var i = 0; i < text.length; i++){
             metrics = ctx.measureText(text[i]);
             heightVeticalText = heightVeticalText + metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent + verticalSpacing
+            if(text[i]==" ") heightVeticalText = heightVeticalText + verticalSpacing * 5
         }     
         return heightVeticalText
     }
