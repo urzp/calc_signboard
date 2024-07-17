@@ -19,14 +19,25 @@
     .ar_down, .ar_up{
         opacity: 0.01;
     }
+    .wrongSize{
+        color: #ffffff !important;
+        background-color: #ff4f4f !important;
+    }
+    [name="board_size"]{
+        text-align: center;
+    }
 </style>
 
 <script>
     let fonts, font_files = [], symbols, canvas, ctx;
     let selctedColor, selectedFont, text_board = 'Текст', borderHorizont = true
     let verticalGap = 5
-    let  textBaseSize = 50, zoom = 0, zoomGap = 10, moveText = 0, moveGap = 50
+    let textBaseSize = 50, zoom = 0, zoomGap = 10, moveText = 0, moveGap = 50
     let blur_2 = 50, blur_opacity = 0.7
+
+    let k_px_mm = 50/169.25
+    let minSymbolSize_mm = 50
+    let board_padding_mm = 50
 
 	const URL_FONTS = 'https://fancyneonservis.ru/php/read_fonts.php'
     const URL_SYMBOLS = 'https://fancyneonservis.ru/php/read_symbols.php'
@@ -34,6 +45,80 @@
     const AJAX_OPTIONS = { type: 'POST', headers: { 'Content-Type': 'application/json;charset=utf-8' } }
 
     $( document ).ready(function(){ init() })
+
+//---------------------------------------------- work space --------------------------------------------------------
+
+function calcBoard(){
+    if(borderHorizont) calcHorizontBoard()
+}
+
+function calcHorizontBoard(){
+   let minWidthBoard = getMinHorizontalBoardWith()
+   $('.min_size_title .tn-atom').text(minWidthBoard/10)
+   let inputSize = Number( $('[name="board_size"]').val() )
+   if(!!inputSize && inputSize < minWidthBoard/10 ){
+        $('[name="board_size"]').addClass('wrongSize')
+        renderCalcResult('-', '-', '-')
+        return false
+   }else{
+        $('[name="board_size"]').removeClass('wrongSize')
+   }    
+   if(!inputSize){
+    heightBoard = getHorizontalBoardheight()
+    renderCalcResult(minWidthBoard, heightBoard , 10)
+   }
+   
+
+}
+
+function renderCalcResult(width, height, summ){
+    $('.board_summ_title .tn-atom').text(summ)
+    if(summ == "-" || !summ ){
+        $('.board_size_title .tn-atom').text(`-`)
+        return false
+    }
+    $('.board_size_title .tn-atom').text(`${width} cм x ${height} см`)
+}
+
+function calcFontSizeHorizontalBoard(){
+    let fontSize = getMinFontSize()
+    ctx.font = `${fontSize}px ${selectedFont}`
+    lenghText_mm = ctx.measureText(text_board).width * k_px_mm
+    while(lenghText_mm < Number( $('[name="board_size"]').val() ) * 10 ){
+        ctx.font = `${fontSize}px ${selectedFont}`
+        lenghText_mm = ctx.measureText(text_board).width / k_px_mm
+        fontSize++
+    }
+    return fontSize
+}   
+
+function getMinHorizontalBoardWith(){
+    let fontSize = getMinFontSize()
+    ctx.font = `${fontSize}px ${selectedFont}`
+    lenghText = ctx.measureText(text_board).width
+    return Math.round( lenghText * k_px_mm + board_padding_mm * 2 )
+}
+
+function getHorizontalBoardheight(fontSize = getMinFontSize()){
+    ctx.font = `${fontSize}px ${selectedFont}`
+    height = ctx.measureText(text_board).actualBoundingBoxAscent + ctx.measureText(text_board).actualBoundingBoxDescent
+    return Math.round( height * k_px_mm + board_padding_mm * 2 )
+}
+
+
+function getMinFontSize(){
+    let findSize = textBaseSize;
+    ctx.font = `${findSize}px ${selectedFont}`
+    leter_w = ctx.measureText("а").width
+    while (leter_w < minSymbolSize_mm/k_px_mm){
+        ctx.font = `${findSize}px ${selectedFont}`
+        leter_w = ctx.measureText("а").width
+        findSize++
+    }
+    return findSize - 1
+}
+
+
 
 // -------------------------------------------  Init Functions ------------------------------------------------------
     
@@ -46,6 +131,7 @@
         initSymbols()
         initZommPanel()
         initMovePanel()
+        intSizeBoardPanel()
     }
 
     function initCanvas(){
@@ -190,10 +276,21 @@
         renderCanvas()
     }
 
+    function intSizeBoardPanel(){
+        ready_t_element('[name="board_size"]', ()=>{ 
+            $('[name="board_size"]').attr({'type':'number'})
+            calcHorizontBoard()
+            $('[name="board_size"]').on("change", function(){
+                calcBoard()
+            })
+        })
+    }
+
 // -------------------------------------------  Render Functions ------------------------------------------------------
     function renderCanvas(){
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         if(borderHorizont){ horizontalBoard() }else{ verticalBoard() }
+        calcBoard()
     }
 
     function horizontalBoard(){
