@@ -13,24 +13,30 @@
     .btn_zoom_plus, .btn_zoom_reset, .btn_zoom_minus{
         cursor: pointer;
     }
+    .btn_move_plus, .btn_move_reset, .btn_move_minus{
+        cursor: pointer;
+    }
+    .ar_down, .ar_up{
+        opacity: 0.01;
+    }
 </style>
 
 <script>
     let fonts, font_files = [], symbols, canvas, ctx;
-    let selctedColor, textBaseSize = 50, zoom = 0, zoomGap = 5, selectedFont, text_board = 'Текст', borderHorizont
+    let selctedColor, selectedFont, text_board = 'Текст', borderHorizont = true
+    let verticalGap = 5
+    let  textBaseSize = 50, zoom = 0, zoomGap = 10, moveText = 0, moveGap = 50
     let blur_2 = 50, blur_opacity = 0.7
+
 	const URL_FONTS = 'https://fancyneonservis.ru/php/read_fonts.php'
     const URL_SYMBOLS = 'https://fancyneonservis.ru/php/read_symbols.php'
     const URL_FONTS_FILE = 'https://fancyneonservis.ru/fonts/getFont.php'
-    const AJAX_OPTIONS = {
-        type: 'POST',
-        headers: { 'Content-Type': 'application/json;charset=utf-8' },
-    }
+    const AJAX_OPTIONS = { type: 'POST', headers: { 'Content-Type': 'application/json;charset=utf-8' } }
 
-    $( document ).ready(function(){
-        init()
-    })
+    $( document ).ready(function(){ init() })
 
+// -------------------------------------------  Init Functions ------------------------------------------------------
+    
     async function init(){
         await initCanvas()
         initTextImput()
@@ -39,6 +45,7 @@
         initBorderOrintation()
         initSymbols()
         initZommPanel()
+        initMovePanel()
     }
 
     function initCanvas(){
@@ -60,99 +67,17 @@
         }
     }
 
-    function heightVeticalText(text,verticalSpacing){
-        let heightVeticalText = 0
-        for (var i = 0; i < text.length; i++){
-            metrics = ctx.measureText(text[i]);
-            heightVeticalText = heightVeticalText + metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent + verticalSpacing
-        }     
-        return heightVeticalText
-    }
-
     function initTextImput(){
         ready_t_element( '[name="text_board"]', ()=>{
             $('[name="text_board"]').on( 'input', function(){
                 text_board = $(this).val()
                 renderCanvas()
             })
+            $('[name="text_board"]').val(text_board)
         })
     }
 
-    function renderCanvas(){
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
-        if(borderHorizont){ horizontalBoard() }else{ verticalBoard() }
-    }
-
-    function verticalBoard(){
-        ajastVerticalText()
-        ctx.fillStyle = selctedColor;
-        ctx.shadowColor = selctedColor;
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 0;
-        ctx.shadowBlur = 20;
-        ctx.fillVerticalText(text_board, canvas.width/2, canvas.height/2, 5);
-        moreLights( ()=>{ctx.fillVerticalText(text_board, canvas.width/2, canvas.height/2, 5)})
-    }
-
-    function moreLights(fillText){
-        let blur_2_color = selctedColor.split(")")[0] + ', ' + blur_opacity +')'
-        ctx.shadowColor = blur_2_color;
-        ctx.shadowBlur = blur_2; 
-        ctx.shadowOffsetX = 2;
-        ctx.shadowOffsetY = 0;
-        fillText()
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 2;
-        fillText()
-        ctx.shadowOffsetX = -2;
-        ctx.shadowOffsetY = 0;
-        fillText()
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = -2;
-        fillText()
-    }
-
-    function ajastVerticalText(){
-        let maxTextHegth = 300
-        textSize =  Number(textBaseSize) + Number(zoom)
-        ctx.font = `${textSize}px ${selectedFont}`
-        textHeight = heightVeticalText(text_board, 5)
-        while( textHeight > maxTextHegth && zoom==0){
-            ctx.font = `${textSize}px ${selectedFont}`;
-            textHeight = heightVeticalText(text_board, 5)
-            textSize--
-        }
-    }
-
-    function horizontalBoard(){
-        ajastWidthText()
-        ctx.fillStyle = selctedColor;
-        ctx.shadowColor = selctedColor;
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 0;
-        ctx.shadowBlur = 20;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(text_board, canvas.width/2, canvas.height/2);
-        ctx.strokeStyle = selctedColor;
-        ctx.strokeText(text_board, canvas.width/2, canvas.height/2);
-        moreLights( ()=>{ ctx.fillText(text_board, canvas.width/2, canvas.height/2) })
-    }
-
-    function ajastWidthText(){
-        let textWidth, textSize, maxTextWidth = 450
-        textSize =  Number(textBaseSize) + Number(zoom)
-        ctx.font = `${textSize}px ${selectedFont}`
-        textWidth = ctx.measureText(text_board).width
-        textHeight = ctx.measureText(text_board).hangingBaseline
-        while( textWidth > maxTextWidth && zoom==0){
-            ctx.font = `${textSize}px ${selectedFont}`;
-            textWidth = ctx.measureText(text_board).width
-            textSize--
-        }
-    }
-
-    function initZommPanel(){
+        function initZommPanel(){
         $('.btn_zoom_plus').click(()=>{
             zoom = zoom + zoomGap;
             renderCanvas()
@@ -163,6 +88,21 @@
         })
         $('.btn_zoom_reset').click(()=>{
             zoom=0;
+            renderCanvas()
+        })
+    }
+
+    function initMovePanel(){
+        $('.btn_move_plus').click(()=>{
+            moveText = moveText + moveGap;
+            renderCanvas()
+        })
+        $('.btn_move_minus').click(()=>{
+            moveText = moveText - moveGap;
+            renderCanvas()
+        })
+        $('.btn_move_reset').click(()=>{
+            moveText=0;
             renderCanvas()
         })
     }
@@ -223,8 +163,116 @@
             border_orintation_action()
             $('.t-input-group').click(function(){
                 border_orintation_action()
+                moveText=0;
+                zoom=0;
             })
         })
+    }
+
+    function border_orintation_action(){
+        if($('[value="Горизонтальная"]').is(':checked')){
+            $('[value="Горизонтальная"]').parent().find('span').css({'color':'#fff'})
+            borderHorizont = true
+            $('.ar_left, .ar_right').css({'opacity':1.0})
+            $('.ar_down, .ar_up').css({'opacity':0.01})
+        }else{
+            $('[value="Горизонтальная"]').parent().find('span').css({'color':'#555'})
+            borderHorizont = false
+            $('.ar_left, .ar_right').css({'opacity':0.01})
+            $('.ar_down, .ar_up').css({'opacity':1.0})
+        }
+        if($('[value="Вертикальная"]').is(':checked')){
+            $('[value="Вертикальная"]').parent().find('span').css({'color':'#fff'})
+        }else{
+            $('[value="Вертикальная"]').parent().find('span').css({'color':'#555'})
+        }
+        renderCanvas()
+    }
+
+// -------------------------------------------  Render Functions ------------------------------------------------------
+    function renderCanvas(){
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        if(borderHorizont){ horizontalBoard() }else{ verticalBoard() }
+    }
+
+    function horizontalBoard(){
+        ajastWidthText()
+        ctx.fillStyle = selctedColor;
+        ctx.shadowColor = selctedColor;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+        ctx.shadowBlur = 20;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text_board, canvas.width/2  + moveText, canvas.height/2);
+        ctx.strokeStyle = selctedColor;
+        ctx.strokeText(text_board, canvas.width/2 + moveText, canvas.height/2);
+        moreLights( ()=>{ ctx.fillText(text_board, canvas.width/2  + moveText, canvas.height/2) })
+    }
+
+    function ajastWidthText(){
+        let textWidth, textSize, maxTextWidth = 450
+        textSize =  Number(textBaseSize) + Number(zoom)
+        ctx.font = `${textSize}px ${selectedFont}`
+        textWidth = ctx.measureText(text_board).width
+        textHeight = ctx.measureText(text_board).hangingBaseline
+        while( textWidth > maxTextWidth && zoom==0){
+            ctx.font = `${textSize}px ${selectedFont}`;
+            textWidth = ctx.measureText(text_board).width
+            textSize--
+        }
+    }
+
+    function verticalBoard(){
+        ajastVerticalText()
+        ctx.fillStyle = selctedColor;
+        ctx.shadowColor = selctedColor;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+        ctx.shadowBlur = 20;
+        ctx.fillVerticalText(text_board, canvas.width/2, canvas.height/2  + moveText, 5);
+        moreLights( ()=>{ctx.fillVerticalText(text_board, canvas.width/2, canvas.height/2  + moveText , 5)})
+    }
+
+    function ajastVerticalText(){
+        let maxTextHegth = 300
+        textSize =  Number(textBaseSize) + Number(zoom)
+        ctx.font = `${textSize}px ${selectedFont}`
+        textHeight = heightVeticalText(text_board, verticalGap)
+        while( textHeight > maxTextHegth && zoom==0){
+            ctx.font = `${textSize}px ${selectedFont}`;
+            textHeight = heightVeticalText(text_board, verticalGap)
+            textSize--
+        }
+    }
+
+    function moreLights(fillText){
+        let blur_2_color = selctedColor.split(")")[0] + ', ' + blur_opacity +')'
+        ctx.shadowColor = blur_2_color;
+        ctx.shadowBlur = blur_2; 
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 0;
+        fillText()
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 2;
+        fillText()
+        ctx.shadowOffsetX = -2;
+        ctx.shadowOffsetY = 0;
+        fillText()
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = -2;
+        fillText()
+    }
+
+// -------------------------------------------  Suport Functions ------------------------------------------------------
+
+    function heightVeticalText(text,verticalSpacing){
+        let heightVeticalText = 0
+        for (var i = 0; i < text.length; i++){
+            metrics = ctx.measureText(text[i]);
+            heightVeticalText = heightVeticalText + metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent + verticalSpacing
+        }     
+        return heightVeticalText
     }
 
     function ready_t_element(css_selector, action){
@@ -236,22 +284,6 @@
         }, 300)
     }
 
-    function border_orintation_action(){
-        if($('[value="Горизонтальная"]').is(':checked')){
-            $('[value="Горизонтальная"]').parent().find('span').css({'color':'#fff'})
-            borderHorizont = true
-        }else{
-            $('[value="Горизонтальная"]').parent().find('span').css({'color':'#555'})
-            borderHorizont = false
-        }
-        if($('[value="Вертикальная"]').is(':checked')){
-            $('[value="Вертикальная"]').parent().find('span').css({'color':'#fff'})
-        }else{
-            $('[value="Вертикальная"]').parent().find('span').css({'color':'#555'})
-        }
-        renderCanvas()
-    }
-
 	async function ajaxReq(url, options, content){
         let response = await fetch(url,{
             method: options.type,
@@ -260,6 +292,5 @@
         })
         return await response.json();
     }
-    
     
 </script>
