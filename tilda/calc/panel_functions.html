@@ -46,6 +46,27 @@
         ctx = canvas.getContext("2d")
         canvas.width = $('#canvas').parent().width()
         canvas.height = $('#canvas').parent().height()
+        
+        CanvasRenderingContext2D.prototype.fillVerticalText =
+        function(text, x, y, verticalSpacing) {
+            let metrics, priviosSymbolHeight = 0, startSymbolYpos = 0
+            y = y - heightVeticalText(text,verticalSpacing)/2
+            for (var i = 0; i < text.length; i++) {
+                metrics = this.measureText(text[i]);
+                startSymbolYpos = startSymbolYpos + metrics.actualBoundingBoxAscent
+                this.fillText(text[i], x, y + ( startSymbolYpos ));
+                startSymbolYpos = startSymbolYpos + metrics.actualBoundingBoxDescent + verticalSpacing
+            }
+        }
+    }
+
+    function heightVeticalText(text,verticalSpacing){
+        let heightVeticalText = 0
+        for (var i = 0; i < text.length; i++){
+            metrics = ctx.measureText(text[i]);
+            heightVeticalText = heightVeticalText + metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent + verticalSpacing
+        }     
+        return heightVeticalText
     }
 
     function initTextImput(){
@@ -59,7 +80,48 @@
 
     function renderCanvas(){
         ctx.clearRect(0, 0, canvas.width, canvas.height)
-        if(borderHorizont) horizontalBoard()
+        if(borderHorizont){ horizontalBoard() }else{ verticalBoard() }
+    }
+
+    function verticalBoard(){
+        ajastVerticalText()
+        ctx.fillStyle = selctedColor;
+        ctx.shadowColor = selctedColor;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+        ctx.shadowBlur = 20;
+        ctx.fillVerticalText(text_board, canvas.width/2, canvas.height/2, 5);
+        moreLights( ()=>{ctx.fillVerticalText(text_board, canvas.width/2, canvas.height/2, 5)})
+    }
+
+    function moreLights(fillText){
+        let blur_2_color = selctedColor.split(")")[0] + ', ' + blur_opacity +')'
+        ctx.shadowColor = blur_2_color;
+        ctx.shadowBlur = blur_2; 
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 0;
+        fillText()
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 2;
+        fillText()
+        ctx.shadowOffsetX = -2;
+        ctx.shadowOffsetY = 0;
+        fillText()
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = -2;
+        fillText()
+    }
+
+    function ajastVerticalText(){
+        let maxTextHegth = 300
+        textSize =  Number(textBaseSize) + Number(zoom)
+        ctx.font = `${textSize}px ${selectedFont}`
+        textHeight = heightVeticalText(text_board, 5)
+        while( textHeight > maxTextHegth && zoom==0){
+            ctx.font = `${textSize}px ${selectedFont}`;
+            textHeight = heightVeticalText(text_board, 5)
+            textSize--
+        }
     }
 
     function horizontalBoard(){
@@ -74,24 +136,7 @@
         ctx.fillText(text_board, canvas.width/2, canvas.height/2);
         ctx.strokeStyle = selctedColor;
         ctx.strokeText(text_board, canvas.width/2, canvas.height/2);
-        let blur_2_color = selctedColor.split(")")[0] + ', ' + blur_opacity +')'
-        ctx.shadowColor = blur_2_color;
-        ctx.shadowOffsetX = 2;
-        ctx.shadowOffsetY = 0;
-        ctx.shadowBlur = blur_2;  
-        ctx.fillText(text_board, canvas.width/2, canvas.height/2);
-        ctx.shadowOffsetX = -2;
-        ctx.shadowOffsetY = 0;
-        ctx.shadowBlur = blur_2;  
-        ctx.fillText(text_board, canvas.width/2, canvas.height/2);
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 2;
-        ctx.shadowBlur = blur_2;  
-        ctx.fillText(text_board, canvas.width/2, canvas.height/2);
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = -2;
-        ctx.shadowBlur = blur_2;  
-        ctx.fillText(text_board, canvas.width/2, canvas.height/2);
+        moreLights( ()=>{ ctx.fillText(text_board, canvas.width/2, canvas.height/2) })
     }
 
     function ajastWidthText(){
