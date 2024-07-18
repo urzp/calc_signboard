@@ -35,9 +35,16 @@
     let textBaseSize = 50, zoom = 0, zoomGap = 10, moveText = 0, moveGap = 50
     let blur_2 = 50, blur_opacity = 0.7
 
-    let k_px_mm = 50/169.25
+    let k_px_mm = 50/146
+    let mimSymbolExample = "W"
     let minSymbolSize_mm = 50
-    let board_padding_mm = 50
+    let maxSymbolSize_mm = 300
+    let maxSymbolSize_px
+    let board_padding_mm = 0
+
+    let calcBaseFont = 600
+    let lengthPrice = 1
+    let calcFontSize
 
 	const URL_FONTS = 'https://fancyneonservis.ru/php/read_fonts.php'
     const URL_SYMBOLS = 'https://fancyneonservis.ru/php/read_symbols.php'
@@ -48,13 +55,85 @@
 
 //---------------------------------------------- work space --------------------------------------------------------
 
+
 function calcBoard(){
-    if(borderHorizont) calcHorizontBoard()
+    if( borderHorizont  ) calcHorizontBoard()
+    if( !borderHorizont ) calcVerticaltBoard()
 }
 
+function calcVerticaltBoard(){
+    let minVerticalBoard = getVerticaltBoardHieght()
+    let maxVerticalBoard = getVerticaltBoardHieght( getMaxFontSize() )
+    calcFontSize = getMinFontSize()
+
+    $('.min_size_title .tn-atom').text(minVerticalBoard/10)
+    $('.max_size_title .tn-atom').text(Math.round( maxVerticalBoard/100 ) * 10)
+
+    let inputSize = Number( $('[name="board_size"]').val() )
+    if(!!inputSize && inputSize < minVerticalBoard/10 ){
+        $('[name="board_size"]').addClass('wrongSize')
+        renderCalcResult('-', '-', '-')
+        return false
+    }else{
+        $('[name="board_size"]').removeClass('wrongSize')
+    }    
+    if(!inputSize){
+        heightBoard = getVerticaltBoardHieght()
+        widthBoard = getVerticalBoardWith()
+        summ = calclBoardPrice()
+        renderCalcResult(widthBoard, heightBoard , summ)
+    }else{
+        calcFontSize = calcFontSizeHorizontalBoard()
+        widthBoard = getVerticalBoardWith( calcFontSize )
+        heightBoard = getVerticaltBoardHieght( calcFontSize )
+        summ = calclBoardPrice()
+        renderCalcResult(widthBoard, heightBoard , summ)
+    }
+}
+
+function getVerticalBoardWith(fontSize = getMinFontSize()){
+    ctx.font = `${fontSize}px ${selectedFont}`
+    let maxWidt = 0
+    text_board.split('').forEach((el)=>{
+        let width = ctx.measureText(el).width
+        if(maxWidt < width){
+            maxWidt = width
+            maxWidthSymbol = el
+        }
+    })
+    return Math.round( maxWidt * k_px_mm + board_padding_mm * 2  ) 
+}
+
+
+function calcFontSizeVerticalBoard(){
+    let fontSize = getMinFontSize()
+    maxSymbolSize_px = getMaxFontSize()   
+    hegthText_mm = getVerticaltBoardHieght() * k_px_mm
+    while(hegthText_mm < Number( $('[name="board_size"]').val() ) * 10 - board_padding_mm * 2 && fontSize <= maxSymbolSize_px){
+        hegthText_mm = getVerticaltBoardHieght(fontSize) * k_px_mm 
+        fontSize++
+    }
+    return fontSize
+}
+
+function getVerticaltBoardHieght(fontSize = getMinFontSize()){
+    ctx.font = `${fontSize}px ${selectedFont}`
+    textHeight = heightVeticalText(text_board, verticalGap)
+    return Math.round( textHeight * k_px_mm + board_padding_mm * 2 )
+    
+}
+
+
+//------------- Horizont ------------
+
 function calcHorizontBoard(){
-   let minWidthBoard = getMinHorizontalBoardWith()
+   let minWidthBoard = getHorizontalBoardWith()
+   let maxWidthBoard = getHorizontalBoardWith( getMaxFontSize() )
+   calcFontSize = getMinFontSize()
+
    $('.min_size_title .tn-atom').text(minWidthBoard/10)
+   $('.max_size_title .tn-atom').text(Math.round( maxWidthBoard/100 ) * 10)
+
    let inputSize = Number( $('[name="board_size"]').val() )
    if(!!inputSize && inputSize < minWidthBoard/10 ){
         $('[name="board_size"]').addClass('wrongSize')
@@ -64,36 +143,34 @@ function calcHorizontBoard(){
         $('[name="board_size"]').removeClass('wrongSize')
    }    
    if(!inputSize){
-    heightBoard = getHorizontalBoardheight()
-    renderCalcResult(minWidthBoard, heightBoard , 10)
+        heightBoard = getHorizontalBoardheight()
+        summ = calclBoardPrice()
+        renderCalcResult(minWidthBoard, heightBoard , summ)
+   }else{
+        calcFontSize = calcFontSizeHorizontalBoard()
+        widthBoard = getHorizontalBoardWith( calcFontSize )
+        heightBoard = getHorizontalBoardheight( calcFontSize )
+        summ = calclBoardPrice()
+        renderCalcResult(widthBoard, heightBoard , summ)
    }
-   
-
 }
 
-function renderCalcResult(width, height, summ){
-    $('.board_summ_title .tn-atom').text(summ)
-    if(summ == "-" || !summ ){
-        $('.board_size_title .tn-atom').text(`-`)
-        return false
-    }
-    $('.board_size_title .tn-atom').text(`${width} cм x ${height} см`)
-}
+
 
 function calcFontSizeHorizontalBoard(){
     let fontSize = getMinFontSize()
+    maxSymbolSize_px = getMaxFontSize()
     ctx.font = `${fontSize}px ${selectedFont}`
     lenghText_mm = ctx.measureText(text_board).width * k_px_mm
-    while(lenghText_mm < Number( $('[name="board_size"]').val() ) * 10 ){
+    while(lenghText_mm < Number( $('[name="board_size"]').val() ) * 10 - board_padding_mm * 2 && fontSize <= maxSymbolSize_px){
         ctx.font = `${fontSize}px ${selectedFont}`
-        lenghText_mm = ctx.measureText(text_board).width / k_px_mm
+        lenghText_mm = ctx.measureText(text_board).width * k_px_mm 
         fontSize++
     }
     return fontSize
 }   
 
-function getMinHorizontalBoardWith(){
-    let fontSize = getMinFontSize()
+function getHorizontalBoardWith(fontSize = getMinFontSize()){
     ctx.font = `${fontSize}px ${selectedFont}`
     lenghText = ctx.measureText(text_board).width
     return Math.round( lenghText * k_px_mm + board_padding_mm * 2 )
@@ -106,29 +183,16 @@ function getHorizontalBoardheight(fontSize = getMinFontSize()){
 }
 
 
-function getMinFontSize(){
-    let findSize = textBaseSize;
-    ctx.font = `${findSize}px ${selectedFont}`
-    leter_w = ctx.measureText("а").width
-    while (leter_w < minSymbolSize_mm/k_px_mm){
-        ctx.font = `${findSize}px ${selectedFont}`
-        leter_w = ctx.measureText("а").width
-        findSize++
-    }
-    return findSize - 1
-}
-
-
-
 // -------------------------------------------  Init Functions ------------------------------------------------------
     
     async function init(){
+        await initData()
         await initCanvas()
+        iniStopSub()
         initTextImput()
         initFontsPanel()
         initColorPanel()
         initBorderOrintation()
-        initSymbols()
         initZommPanel()
         initMovePanel()
         intSizeBoardPanel()
@@ -159,6 +223,7 @@ function getMinFontSize(){
             $('[name="text_board"]').on( 'input', function(){
                 text_board = $(this).val()
                 renderCanvas()
+                calcBoard()
             })
             $('[name="text_board"]').val(text_board)
         })
@@ -194,12 +259,20 @@ function getMinFontSize(){
         })
     }
 
-    async function initSymbols(){
+    async function initData(){
         symbols = await ajaxReq(URL_SYMBOLS, AJAX_OPTIONS, {})
+        fonts = await ajaxReq(URL_FONTS, AJAX_OPTIONS, {})
+        return true
+    }
+
+    function iniStopSub(){
+        $('.no_submit .tn-form__submit, .border_orintation_panel .tn-form__submit').on( "click", function( event ) {
+            event.stopPropagation();    
+        });
     }
 
     async function initFontsPanel(){
-        fonts = await ajaxReq(URL_FONTS, AJAX_OPTIONS, {})
+        
         for(let i=1;i<=10;i++){
             let fontName = fonts[i-1].name
             let font = fonts[i-1]
@@ -214,6 +287,7 @@ function getMinFontSize(){
             selectedFont = $(this).attr('font')
             textBaseSize = $(this).attr('font_base_size')
             renderCanvas()
+            calcBoard()
         })
         $('.btn_font_1').click()
 
@@ -274,6 +348,7 @@ function getMinFontSize(){
             $('[value="Вертикальная"]').parent().find('span').css({'color':'#555'})
         }
         renderCanvas()
+        calcBoard()
     }
 
     function intSizeBoardPanel(){
@@ -283,6 +358,12 @@ function getMinFontSize(){
             $('[name="board_size"]').on("change", function(){
                 calcBoard()
             })
+            $('[name="board_size"]').on("input", function(){
+                let max = Number($('.max_size_title .tn-atom').text())
+                let min = Number($('.min_size_title .tn-atom').text())
+                if( $(this).val() > max ) $(this).val(max)
+                if( $(this).val() < min ) $(this).val(min)
+            })
         })
     }
 
@@ -290,7 +371,6 @@ function getMinFontSize(){
     function renderCanvas(){
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         if(borderHorizont){ horizontalBoard() }else{ verticalBoard() }
-        calcBoard()
     }
 
     function horizontalBoard(){
@@ -345,6 +425,7 @@ function getMinFontSize(){
     }
 
     function moreLights(fillText){
+        if(!selctedColor) return false 
         let blur_2_color = selctedColor.split(")")[0] + ', ' + blur_opacity +')'
         ctx.shadowColor = blur_2_color;
         ctx.shadowBlur = blur_2; 
@@ -361,6 +442,80 @@ function getMinFontSize(){
         ctx.shadowOffsetY = -2;
         fillText()
     }
+// -------------------------------------------  Calc Functions ------------------------------------------------------
+function calclBoardPrice(){
+    return Math.round( calcLengthBoard() * lengthPrice )
+}
+
+function calcLengthBoard(){
+    let result = 0
+    if(!text_board) return result
+    text_board.split('').forEach((el)=>{
+        result = result + calcLengthSymbol(el)
+    })
+    return result
+}
+
+function calcLengthSymbol(symbol){
+    if(!symbols) return 0
+    let sybmolParans = symbols.find( (el)=> el.name == symbol)
+    let baseLength = sybmolParans.fonts.find( (el)=> el.name.split('.')[0] == selectedFont)
+    baseLength = baseLength.length
+    let lengthSymbol = baseLength * (calcFontSize/calcBaseFont)
+    return lengthSymbol
+}
+
+function getMaxFontSize(){
+    let maxWidthSymbol
+    let findSize = textBaseSize;
+    ctx.font = `${findSize}px ${selectedFont}`
+    if(text_board==''){
+        maxWidthSymbol = mimSymbolExample
+    }else{
+        let maxWidt = 0
+        text_board.split('').forEach((el)=>{
+            let width = ctx.measureText(el).width
+            if(maxWidt < width){
+                maxWidt = width
+                maxWidthSymbol = el
+            }
+        })
+    }
+    leter_w = ctx.measureText(maxWidthSymbol).width
+
+    while (leter_w < maxSymbolSize_mm/k_px_mm){
+        ctx.font = `${findSize}px ${selectedFont}`
+        leter_w = ctx.measureText(maxWidthSymbol).width
+        findSize++
+    }
+    return findSize - 1
+}
+
+function getMinFontSize(){
+    let findSize = textBaseSize;
+    ctx.font = `${findSize}px ${selectedFont}`
+    leter_w = ctx.measureText(mimSymbolExample).width
+    
+    while (leter_w < minSymbolSize_mm/k_px_mm){
+        ctx.font = `${findSize}px ${selectedFont}`
+        leter_w = ctx.measureText(mimSymbolExample).width
+        findSize++
+    }
+    return findSize - 1
+}
+
+function renderCalcResult(width, height, summ){
+    $('.board_summ_title .tn-atom').text(summ)
+    if(summ == "-" || !summ ){
+        $('.board_size_title .tn-atom').text(`-`)
+        return false
+    }
+    width = width/10
+    if(width > 10) width = Math.round(width)
+    height = height/10
+    if(height > 10) height = Math.round(height)
+    $('.board_size_title .tn-atom').text(`${width} cм x ${height} см`)
+}
 
 // -------------------------------------------  Suport Functions ------------------------------------------------------
 
