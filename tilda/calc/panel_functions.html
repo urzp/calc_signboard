@@ -56,132 +56,6 @@
 //---------------------------------------------- work space --------------------------------------------------------
 
 
-function calcBoard(){
-    if( borderHorizont  ) calcHorizontBoard()
-    if( !borderHorizont ) calcVerticaltBoard()
-}
-
-function calcVerticaltBoard(){
-    let minVerticalBoard = getVerticaltBoardHieght()
-    let maxVerticalBoard = getVerticaltBoardHieght( getMaxFontSize() )
-    calcFontSize = getMinFontSize()
-
-    $('.min_size_title .tn-atom').text(minVerticalBoard/10)
-    $('.max_size_title .tn-atom').text(Math.round( maxVerticalBoard/100 ) * 10)
-
-    let inputSize = Number( $('[name="board_size"]').val() )
-    if(!!inputSize && inputSize < minVerticalBoard/10 ){
-        $('[name="board_size"]').addClass('wrongSize')
-        renderCalcResult('-', '-', '-')
-        return false
-    }else{
-        $('[name="board_size"]').removeClass('wrongSize')
-    }    
-    if(!inputSize){
-        heightBoard = getVerticaltBoardHieght()
-        widthBoard = getVerticalBoardWith()
-        summ = calclBoardPrice()
-        renderCalcResult(widthBoard, heightBoard , summ)
-    }else{
-        calcFontSize = calcFontSizeHorizontalBoard()
-        widthBoard = getVerticalBoardWith( calcFontSize )
-        heightBoard = getVerticaltBoardHieght( calcFontSize )
-        summ = calclBoardPrice()
-        renderCalcResult(widthBoard, heightBoard , summ)
-    }
-}
-
-function getVerticalBoardWith(fontSize = getMinFontSize()){
-    ctx.font = `${fontSize}px ${selectedFont}`
-    let maxWidt = 0
-    text_board.split('').forEach((el)=>{
-        let width = ctx.measureText(el).width
-        if(maxWidt < width){
-            maxWidt = width
-            maxWidthSymbol = el
-        }
-    })
-    return Math.round( maxWidt * k_px_mm + board_padding_mm * 2  ) 
-}
-
-
-function calcFontSizeVerticalBoard(){
-    let fontSize = getMinFontSize()
-    maxSymbolSize_px = getMaxFontSize()   
-    hegthText_mm = getVerticaltBoardHieght() * k_px_mm
-    while(hegthText_mm < Number( $('[name="board_size"]').val() ) * 10 - board_padding_mm * 2 && fontSize <= maxSymbolSize_px){
-        hegthText_mm = getVerticaltBoardHieght(fontSize) * k_px_mm 
-        fontSize++
-    }
-    return fontSize
-}
-
-function getVerticaltBoardHieght(fontSize = getMinFontSize()){
-    ctx.font = `${fontSize}px ${selectedFont}`
-    textHeight = heightVeticalText(text_board, verticalGap)
-    return Math.round( textHeight * k_px_mm + board_padding_mm * 2 )
-    
-}
-
-
-//------------- Horizont ------------
-
-function calcHorizontBoard(){
-   let minWidthBoard = getHorizontalBoardWith()
-   let maxWidthBoard = getHorizontalBoardWith( getMaxFontSize() )
-   calcFontSize = getMinFontSize()
-
-   $('.min_size_title .tn-atom').text(minWidthBoard/10)
-   $('.max_size_title .tn-atom').text(Math.round( maxWidthBoard/100 ) * 10)
-
-   let inputSize = Number( $('[name="board_size"]').val() )
-   if(!!inputSize && inputSize < minWidthBoard/10 ){
-        $('[name="board_size"]').addClass('wrongSize')
-        renderCalcResult('-', '-', '-')
-        return false
-   }else{
-        $('[name="board_size"]').removeClass('wrongSize')
-   }    
-   if(!inputSize){
-        heightBoard = getHorizontalBoardheight()
-        summ = calclBoardPrice()
-        renderCalcResult(minWidthBoard, heightBoard , summ)
-   }else{
-        calcFontSize = calcFontSizeHorizontalBoard()
-        widthBoard = getHorizontalBoardWith( calcFontSize )
-        heightBoard = getHorizontalBoardheight( calcFontSize )
-        summ = calclBoardPrice()
-        renderCalcResult(widthBoard, heightBoard , summ)
-   }
-}
-
-
-
-function calcFontSizeHorizontalBoard(){
-    let fontSize = getMinFontSize()
-    maxSymbolSize_px = getMaxFontSize()
-    ctx.font = `${fontSize}px ${selectedFont}`
-    lenghText_mm = ctx.measureText(text_board).width * k_px_mm
-    while(lenghText_mm < Number( $('[name="board_size"]').val() ) * 10 - board_padding_mm * 2 && fontSize <= maxSymbolSize_px){
-        ctx.font = `${fontSize}px ${selectedFont}`
-        lenghText_mm = ctx.measureText(text_board).width * k_px_mm 
-        fontSize++
-    }
-    return fontSize
-}   
-
-function getHorizontalBoardWith(fontSize = getMinFontSize()){
-    ctx.font = `${fontSize}px ${selectedFont}`
-    lenghText = ctx.measureText(text_board).width
-    return Math.round( lenghText * k_px_mm + board_padding_mm * 2 )
-}
-
-function getHorizontalBoardheight(fontSize = getMinFontSize()){
-    ctx.font = `${fontSize}px ${selectedFont}`
-    height = ctx.measureText(text_board).actualBoundingBoxAscent + ctx.measureText(text_board).actualBoundingBoxDescent
-    return Math.round( height * k_px_mm + board_padding_mm * 2 )
-}
-
 
 // -------------------------------------------  Init Functions ------------------------------------------------------
     
@@ -360,9 +234,9 @@ function getHorizontalBoardheight(fontSize = getMinFontSize()){
             })
             $('[name="board_size"]').on("input", function(){
                 let max = Number($('.max_size_title .tn-atom').text())
-                let min = Number($('.min_size_title .tn-atom').text())
+                //let min = Number($('.min_size_title .tn-atom').text())
                 if( $(this).val() > max ) $(this).val(max)
-                if( $(this).val() < min ) $(this).val(min)
+                //if( $(this).val() < min ) $(this).val(min)
             })
         })
     }
@@ -443,6 +317,131 @@ function getHorizontalBoardheight(fontSize = getMinFontSize()){
         fillText()
     }
 // -------------------------------------------  Calc Functions ------------------------------------------------------
+
+function calcBoard(){
+    if( borderHorizont  ) calcHorizontBoard()
+    if( !borderHorizont ) calcVerticaltBoard()
+}
+
+function calcVerticaltBoard(){
+    let minVerticalBoard = getVerticaltBoardHieght()
+    let maxVerticalBoard = getVerticaltBoardHieght( getMaxFontSize() )
+    calcFontSize = getMinFontSize()
+
+    $('.min_size_title .tn-atom').text(minVerticalBoard/10)
+    $('.max_size_title .tn-atom').text(Math.round( maxVerticalBoard/100 ) * 10)
+
+    let inputSize = Number( $('[name="board_size"]').val() )
+    if(!!inputSize && inputSize < minVerticalBoard/10 ){
+        $('[name="board_size"]').addClass('wrongSize')
+        renderCalcResult('-', '-', '-')
+        return false
+    }else{
+        $('[name="board_size"]').removeClass('wrongSize')
+    }    
+    if(!inputSize){
+        heightBoard = getVerticaltBoardHieght()
+        widthBoard = getVerticalBoardWith()
+        summ = calclBoardPrice()
+        renderCalcResult(widthBoard, heightBoard , summ)
+    }else{
+        calcFontSize = calcFontSizeHorizontalBoard()
+        widthBoard = getVerticalBoardWith( calcFontSize )
+        heightBoard = getVerticaltBoardHieght( calcFontSize )
+        summ = calclBoardPrice()
+        renderCalcResult(widthBoard, heightBoard , summ)
+    }
+}
+
+function getVerticalBoardWith(fontSize = getMinFontSize()){
+    ctx.font = `${fontSize}px ${selectedFont}`
+    let maxWidt = 0
+    text_board.split('').forEach((el)=>{
+        let width = ctx.measureText(el).width
+        if(maxWidt < width){
+            maxWidt = width
+            maxWidthSymbol = el
+        }
+    })
+    return Math.round( maxWidt * k_px_mm + board_padding_mm * 2  ) 
+}
+
+
+function calcFontSizeVerticalBoard(){
+    let fontSize = getMinFontSize()
+    maxSymbolSize_px = getMaxFontSize()   
+    hegthText_mm = getVerticaltBoardHieght() * k_px_mm
+    while(hegthText_mm < Number( $('[name="board_size"]').val() ) * 10 - board_padding_mm * 2 && fontSize <= maxSymbolSize_px){
+        hegthText_mm = getVerticaltBoardHieght(fontSize) * k_px_mm 
+        fontSize++
+    }
+    return fontSize
+}
+
+function getVerticaltBoardHieght(fontSize = getMinFontSize()){
+    ctx.font = `${fontSize}px ${selectedFont}`
+    textHeight = heightVeticalText(text_board, verticalGap)
+    return Math.round( textHeight * k_px_mm + board_padding_mm * 2 )
+    
+}
+
+
+//------------- Horizont ------------
+
+function calcHorizontBoard(){
+   let minWidthBoard = getHorizontalBoardWith()
+   let maxWidthBoard = getHorizontalBoardWith( getMaxFontSize() )
+   calcFontSize = getMinFontSize()
+
+   $('.min_size_title .tn-atom').text(minWidthBoard/10)
+   $('.max_size_title .tn-atom').text(Math.round( maxWidthBoard/100 ) * 10)
+
+   let inputSize = Number( $('[name="board_size"]').val() )
+   if(!!inputSize && inputSize < minWidthBoard/10 ){
+        $('[name="board_size"]').addClass('wrongSize')
+        renderCalcResult('-', '-', '-')
+        return false
+   }else{
+        $('[name="board_size"]').removeClass('wrongSize')
+   }    
+   if(!inputSize){
+        heightBoard = getHorizontalBoardheight()
+        summ = calclBoardPrice()
+        renderCalcResult(minWidthBoard, heightBoard , summ)
+   }else{
+        calcFontSize = calcFontSizeHorizontalBoard()
+        widthBoard = getHorizontalBoardWith( calcFontSize )
+        heightBoard = getHorizontalBoardheight( calcFontSize )
+        summ = calclBoardPrice()
+        renderCalcResult(widthBoard, heightBoard , summ)
+   }
+}
+
+function calcFontSizeHorizontalBoard(){
+    let fontSize = getMinFontSize()
+    maxSymbolSize_px = getMaxFontSize()
+    ctx.font = `${fontSize}px ${selectedFont}`
+    lenghText_mm = ctx.measureText(text_board).width * k_px_mm
+    while(lenghText_mm < Number( $('[name="board_size"]').val() ) * 10 - board_padding_mm * 2 && fontSize <= maxSymbolSize_px){
+        ctx.font = `${fontSize}px ${selectedFont}`
+        lenghText_mm = ctx.measureText(text_board).width * k_px_mm 
+        fontSize++
+    }
+    return fontSize
+}   
+
+function getHorizontalBoardWith(fontSize = getMinFontSize()){
+    ctx.font = `${fontSize}px ${selectedFont}`
+    lenghText = ctx.measureText(text_board).width
+    return Math.round( lenghText * k_px_mm + board_padding_mm * 2 )
+}
+
+function getHorizontalBoardheight(fontSize = getMinFontSize()){
+    ctx.font = `${fontSize}px ${selectedFont}`
+    height = ctx.measureText(text_board).actualBoundingBoxAscent + ctx.measureText(text_board).actualBoundingBoxDescent
+    return Math.round( height * k_px_mm + board_padding_mm * 2 )
+}
+
 function calclBoardPrice(){
     return Math.round( calcLengthBoard() * lengthPrice )
 }
