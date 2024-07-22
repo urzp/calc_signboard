@@ -116,6 +116,9 @@
 	})
 
 	async function renderPanel(){
+		configs = [];
+		configs = await ajaxReq(URL_CONFIGS, AJAX_OPTIONS, {})
+		renderConfigs()
 		buttonsTarget = '.font_panel'
 		await $('.font_button.clone').remove()
 		fonts = await ajaxReq(URL_FONTS, AJAX_OPTIONS, {})
@@ -129,6 +132,15 @@
 		await setAttrButons(fonts)
 		await renderSymbolPanel()
 		ajastHeights()
+	}
+
+	function renderConfigs(){
+		let lengthPrice =  configs.find( el =>  el.name == 'lengthPrice').value
+		let calcBaseFont =  configs.find( el =>  el.name == 'calcBaseFont').value
+		let board_padding_mm =  configs.find( el =>  el.name == 'board_padding_mm').value
+		$('[name="lengthPrice"]').val(lengthPrice)
+		$('[name="calcBaseFont"]').val(calcBaseFont)
+		$('[name="board_padding_mm"]').val(board_padding_mm)
 	}
 
 	function ajastHeights(){

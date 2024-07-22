@@ -1,0 +1,18 @@
+<style>
+    .btn_save_config{
+        cursor: pointer;
+    }
+</style>
+<script>
+    $('.btn_save_config').click(()=>{
+        configs[0].value = $('[name="lengthPrice"]').val()
+        configs[1].value = $('[name="calcBaseFont"]').val()
+        configs[2].value = $('[name="board_padding_mm"]').val()
+        var formData = new FormData();
+        formData.append('configs', JSON.stringify(configs))
+        ajax(URL_CONFIGS_UPDATE, formData, ()=>{ 
+            //$('.t-popup').click(), 
+            renderPanel() 
+        })
+    })
+</script>

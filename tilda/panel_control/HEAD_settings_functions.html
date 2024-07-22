@@ -1,5 +1,7 @@
 <!-- Функции и настройки -->
 <script>
+    const URL_CONFIGS = 'https://fancyneonservis.ru/php/read_config.php'
+    const URL_CONFIGS_UPDATE = 'https://fancyneonservis.ru/php/config_update.php'
     const URL_FONT = 'https://fancyneonservis.ru/php/font.php'
 	const URL_FONTS = 'https://fancyneonservis.ru/php/read_fonts.php'
     const URL_SYMBOL = 'https://fancyneonservis.ru/php/symbol.php'
@@ -8,7 +10,7 @@
         type: 'POST',
         headers: { 'Content-Type': 'application/json;charset=utf-8' },
     }
-	let fonts, symbols, check_symbols
+	let configs, fonts, symbols, check_symbols
 
 
     function ajax(url, formData, responce){

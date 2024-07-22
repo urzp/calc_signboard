@@ -29,7 +29,7 @@
 </style>
 
 <script>
-    let fonts, font_files = [], symbols, canvas, ctx;
+    let configs, fonts, font_files = [], symbols, canvas, ctx;
     let selctedColor, selectedFont, text_board = 'Текст', borderHorizont = true, board_width = 0, board_heigth = 0
     let verticalGap = 5
     let textBaseSize = 50, zoom = 0, zoomGap = 10, moveText = 0, moveGap = 50
@@ -42,11 +42,12 @@
     let maxSymbolSize_px
     let board_padding_mm = 0
 
-    let calcBaseFont = 600
-    let lengthPrice = 1
+    let calcBaseFont 
+    let lengthPrice
     let calcFontSize
     let summ
 
+    const URL_CONFIGS = 'https://fancyneonservis.ru/php/read_config.php'
 	const URL_FONTS = 'https://fancyneonservis.ru/php/read_fonts.php'
     const URL_SYMBOLS = 'https://fancyneonservis.ru/php/read_symbols.php'
     const URL_FONTS_FILE = 'https://fancyneonservis.ru/fonts/getFont.php'
@@ -63,6 +64,7 @@
     async function init(){
         await initData()
         await initCanvas()
+        initConfigs()
         iniStopSub()
         initTextImput()
         initFontsPanel()
@@ -93,6 +95,12 @@
                 if(text[i]==" ") startSymbolYpos = startSymbolYpos + verticalSpacing * 5
             }
         }
+    }
+
+    function initConfigs(){
+        lengthPrice = Number( configs.find( el =>  el.name == 'lengthPrice').value )
+		calcBaseFont = Number(  configs.find( el =>  el.name == 'calcBaseFont').value )
+		board_padding_mm = Number(  configs.find( el =>  el.name == 'board_padding_mm').value )
     }
 
     function initTextImput(){
@@ -137,6 +145,7 @@
     }
 
     async function initData(){
+        configs = await ajaxReq(URL_CONFIGS, AJAX_OPTIONS, {})
         symbols = await ajaxReq(URL_SYMBOLS, AJAX_OPTIONS, {})
         fonts = await ajaxReq(URL_FONTS, AJAX_OPTIONS, {})
         return true
