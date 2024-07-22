@@ -13,7 +13,7 @@
     .btn_zoom_plus, .btn_zoom_reset, .btn_zoom_minus{
         cursor: pointer;
     }
-    .btn_move_plus, .btn_move_reset, .btn_move_minus{
+    .btn_move_plus, .btn_move_reset, .btn_move_minus, .btn_submit_form{
         cursor: pointer;
     }
     .ar_down, .ar_up{
@@ -30,7 +30,7 @@
 
 <script>
     let fonts, font_files = [], symbols, canvas, ctx;
-    let selctedColor, selectedFont, text_board = 'Текст', borderHorizont = true
+    let selctedColor, selectedFont, text_board = 'Текст', borderHorizont = true, board_width = 0, board_heigth = 0
     let verticalGap = 5
     let textBaseSize = 50, zoom = 0, zoomGap = 10, moveText = 0, moveGap = 50
     let blur_2 = 50, blur_opacity = 0.7
@@ -45,6 +45,7 @@
     let calcBaseFont = 600
     let lengthPrice = 1
     let calcFontSize
+    let summ
 
 	const URL_FONTS = 'https://fancyneonservis.ru/php/read_fonts.php'
     const URL_SYMBOLS = 'https://fancyneonservis.ru/php/read_symbols.php'
@@ -70,6 +71,8 @@
         initZommPanel()
         initMovePanel()
         intSizeBoardPanel()
+        intSendForm()
+        fillSendForm()
     }
 
     function initCanvas(){
@@ -241,6 +244,12 @@
         })
     }
 
+    function intSendForm(){
+        $('.btn_submit_form').click(()=>{
+            $('.send_form .t-submit').click()
+        })
+    }
+
 // -------------------------------------------  Render Functions ------------------------------------------------------
     function renderCanvas(){
         ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -318,9 +327,10 @@
     }
 // -------------------------------------------  Calc Functions ------------------------------------------------------
 
-function calcBoard(){
-    if( borderHorizont  ) calcHorizontBoard()
-    if( !borderHorizont ) calcVerticaltBoard()
+async function calcBoard(){
+    if( borderHorizont  ) await calcHorizontBoard()
+    if( !borderHorizont ) await calcVerticaltBoard()
+    fillSendForm()
 }
 
 function calcVerticaltBoard(){
@@ -458,6 +468,7 @@ function calcLengthBoard(){
 function calcLengthSymbol(symbol){
     if(!symbols) return 0
     let sybmolParans = symbols.find( (el)=> el.name == symbol)
+    if(!sybmolParans) return 0
     let baseLength = sybmolParans.fonts.find( (el)=> el.name.split('.')[0] == selectedFont)
     baseLength = baseLength.length
     let lengthSymbol = baseLength * (calcFontSize/calcBaseFont)
@@ -514,7 +525,21 @@ function renderCalcResult(width, height, summ){
     height = height/10
     if(height > 10) height = Math.round(height)
     $('.board_size_title .tn-atom').text(`${width} cм x ${height} см`)
+    board_width = width
+    board_heigth = height
 }
+
+
+function fillSendForm(){
+    $('[name=send_form_text]').val(text_board)
+    $('[name=send_form_font]').val(selectedFont)
+    $('[name=send_form_color]').val(selctedColor)
+    if( borderHorizont ){ orintation = 'horizontal' } else { orintation = 'vertical' }
+    $('[name=send_form_orintation]').val(orintation)
+    $('[name=send_form_board_size]').val(`${board_width} см X ${board_heigth} см`)
+    $('[name=send_form_price]').val(`${summ} р.`)
+}
+
 
 // -------------------------------------------  Suport Functions ------------------------------------------------------
 
