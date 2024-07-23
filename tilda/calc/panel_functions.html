@@ -255,7 +255,7 @@
             $('[name="board_size"]').on("input", function(){
                 let max = Number($('.max_size_title .tn-atom').text())
                 //let min = Number($('.min_size_title .tn-atom').text())
-                if( $(this).val() > max ) $(this).val(max)
+                if( $(this).val() > max ){ $(this).val(max); t1093__processCurrentPopupOnShow('#moreSize') }
                 //if( $(this).val() < min ) $(this).val(min)
             })
         })
