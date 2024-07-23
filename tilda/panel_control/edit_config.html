@@ -8,6 +8,8 @@
         configs[0].value = $('[name="lengthPrice"]').val()
         configs[1].value = $('[name="calcBaseFont"]').val()
         configs[2].value = $('[name="board_padding_mm"]').val()
+        configs[3].value = $('[name="coefficientLength"]').val()
+        configs[4].value = $('[name="minSumm"]').val()
         var formData = new FormData();
         formData.append('configs', JSON.stringify(configs))
         ajax(URL_CONFIGS_UPDATE, formData, ()=>{ 

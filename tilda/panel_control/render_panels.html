@@ -138,9 +138,14 @@
 		let lengthPrice =  configs.find( el =>  el.name == 'lengthPrice').value
 		let calcBaseFont =  configs.find( el =>  el.name == 'calcBaseFont').value
 		let board_padding_mm =  configs.find( el =>  el.name == 'board_padding_mm').value
+		let calcСoefficientLength =  configs.find( el =>  el.name == 'calcСoefficientLength').value
+		let minSumm =  configs.find( el =>  el.name == 'minSumm').value
 		$('[name="lengthPrice"]').val(lengthPrice)
 		$('[name="calcBaseFont"]').val(calcBaseFont)
 		$('[name="board_padding_mm"]').val(board_padding_mm)
+		$('[name="coefficientLength"]').val(calcСoefficientLength)
+		$('[name="minSumm"]').val(minSumm)
+		
 	}
 
 	function ajastHeights(){

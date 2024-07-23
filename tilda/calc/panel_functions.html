@@ -45,7 +45,9 @@
     let calcBaseFont 
     let lengthPrice
     let calcFontSize
+    let calcСoefficientLength = 0.5
     let summ
+    let minSumm
 
     const URL_CONFIGS = 'https://fancyneonservis.ru/php/read_config.php'
 	const URL_FONTS = 'https://fancyneonservis.ru/php/read_fonts.php'
@@ -109,6 +111,8 @@
         lengthPrice = Number( configs.find( el =>  el.name == 'lengthPrice').value )
 		calcBaseFont = Number(  configs.find( el =>  el.name == 'calcBaseFont').value )
 		board_padding_mm = Number(  configs.find( el =>  el.name == 'board_padding_mm').value )
+        calcСoefficientLength = Number(  configs.find( el =>  el.name == 'calcСoefficientLength').value )
+        minSumm = Number(  configs.find( el =>  el.name == 'minSumm').value )
     }
 
     function initTextImput(){
@@ -470,7 +474,9 @@ function getHorizontalBoardheight(fontSize = getMinFontSize()){
 }
 
 function calclBoardPrice(){
-    return Math.round( calcLengthBoard() * lengthPrice )
+    let price = Math.round( calcLengthBoard() * lengthPrice / 1000 ) //lengthPrice р. / mm.
+    if(price <  minSumm) price = minSumm
+    return price
 }
 
 function calcLengthBoard(){
@@ -488,7 +494,7 @@ function calcLengthSymbol(symbol){
     if(!sybmolParans) return 0
     let baseLength = sybmolParans.fonts.find( (el)=> el.name.split('.')[0] == selectedFont)
     baseLength = baseLength.length
-    let lengthSymbol = baseLength * (calcFontSize/calcBaseFont)
+    let lengthSymbol = baseLength * (calcFontSize/calcBaseFont) * calcСoefficientLength
     return lengthSymbol
 }
 
