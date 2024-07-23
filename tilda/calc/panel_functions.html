@@ -80,7 +80,15 @@
     function initCanvas(){
         canvas = document.getElementById("canvas");
         ctx = canvas.getContext("2d")
-        canvas.width = $('#canvas').parent().width()
+        // TILDA html blok bag wide < 480
+        if( $(window).width() < 480 ){
+            let width = $('.canvas_border').width()
+            $('.t_canvas .tn-atom').css({'width':width +'px'})
+            $('.t_canvas').css({'width':width +'px'})
+            canvas.width = width
+        }else{
+            canvas.width = $('#canvas').parent().width()
+        }
         canvas.height = $('#canvas').parent().height()
         
         CanvasRenderingContext2D.prototype.fillVerticalText =
