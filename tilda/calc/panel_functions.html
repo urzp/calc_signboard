@@ -544,9 +544,9 @@ function renderCalcResult(width, height, summ){
         return false
     }
     width = width/10
-    if(width > 10) width = Math.round(width)
     height = height/10
-    if(height > 10) height = Math.round(height)
+    //if(width > 10) width = Math.round(width)
+    //if(height > 10) height = Math.round(height)
     $('.board_size_title .tn-atom').text(`${width} cм x ${height} см`)
     board_width = width
     board_heigth = height
