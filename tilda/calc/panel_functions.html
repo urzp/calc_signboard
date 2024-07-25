@@ -524,7 +524,7 @@ function getMaxFontSize(){
     return findSize - 1
 }
 
-function getMinFontSize(){
+function getMinFontSize_(){
     let findSize = textBaseSize;
     ctx.font = `${findSize}px ${selectedFont}`
     leter_w = ctx.measureText(mimSymbolExample).width
@@ -535,6 +535,30 @@ function getMinFontSize(){
         findSize++
     }
     return findSize - 1
+}
+
+function getMinFontSize(){
+    if( text_board.length == 0) return textBaseSize
+    let findSize = textBaseSize;
+    ctx.font = `${findSize}px ${selectedFont}`
+    let minHightSumbol = text_board.split('')[0]
+    let minHight = ctx.measureText(minHightSumbol).actualBoundingBoxAscent + ctx.measureText(minHightSumbol).actualBoundingBoxDescent
+    text_board.split('').forEach((e)=>{
+        let hightSymbol = ctx.measureText(e).actualBoundingBoxAscent + ctx.measureText(e).actualBoundingBoxDescent
+        if(hightSymbol < minHight){
+            minHight = hightSymbol
+            minHightSumbol = e
+        }
+    })
+    leter_h = ctx.measureText(minHightSumbol).width
+    
+    while (leter_h < minSymbolSize_mm/k_px_mm){
+        ctx.font = `${findSize}px ${selectedFont}`
+        let leter_measure = ctx.measureText(minHightSumbol)
+        leter_h = leter_measure.actualBoundingBoxAscent + leter_measure.actualBoundingBoxDescent
+        findSize++
+    }
+    return findSize - 1   
 }
 
 function renderCalcResult(width, height, summ){
