@@ -124,13 +124,14 @@
         canvas.height = $('#canvas').parent().height()
         
         CanvasRenderingContext2D.prototype.fillVerticalText =
-        function(text, x, y, verticalSpacing) {
+        function(text, x, y, verticalSpacing, useStroke=false) {
             let metrics, priviosSymbolHeight = 0, startSymbolYpos = 0
             y = y - heightVeticalText(text,verticalSpacing)/2
             for (var i = 0; i < text.length; i++) {
                 metrics = this.measureText(text[i]);
                 startSymbolYpos = startSymbolYpos + metrics.actualBoundingBoxAscent
                 this.fillText(text[i], x, y + ( startSymbolYpos ));
+                if( useStroke ) this.strokeText(text[i], x, y + ( startSymbolYpos ));
                 startSymbolYpos = startSymbolYpos + metrics.actualBoundingBoxDescent + verticalSpacing
                 if(text[i]==" ") startSymbolYpos = startSymbolYpos + verticalSpacing * 5
             }
@@ -147,10 +148,10 @@
 
     function initTextImput(){
         ready_t_element( '[name="text_board"]', ()=>{
-            $('[name="text_board"]').on( 'input', function(){
+            $('[name="text_board"]').on( 'input', async function(){
                 text_board = $(this).val()
-                renderCanvas()
                 calcBoard()
+                renderCanvas()
             })
             $('[name="text_board"]').val(text_board)
         })
@@ -214,8 +215,8 @@
             $(this).addClass('btn_font_selected')
             selectedFont = $(this).attr('font')
             textBaseSize = $(this).attr('font_base_size')
-            renderCanvas()
             calcBoard()
+            renderCanvas()
         })
         $('.btn_font_1').click()
 
@@ -299,8 +300,9 @@
         }else{
             $('[value="Вертикальная"]').parent().find('span').css({'color':'#555'})
         }
-        renderCanvas()
+        
         calcBoard()
+        renderCanvas()
     }
 
     function intSizeBoardPanel(){
@@ -309,6 +311,7 @@
             calcHorizontBoard()
             $('[name="board_size"]').on("change", function(){
                 calcBoard()
+                renderCanvas()
             })
             $('[name="board_size"]').on("input", function(){
                 let max = Number($('.max_size_title .tn-atom').text())
@@ -333,25 +336,15 @@
 
     function horizontalBoard(){
         ajastWidthText()
-        
-        //ctx.fillStyle = selctedColorBright;
-        // ctx.shadowColor = selctedColor;
-        // ctx.shadowOffsetX = 0;
-        // ctx.shadowOffsetY = 0;
-        // ctx.shadowBlur = 20;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        // renderBG(()=>{
+        //renderBG(()=>{
+            fillTextLayer( 80, 80, selctedColorDark)
+            fillTextLayer( 12, 40, selctedColorDark)
+            fillTextLayer( 8, 3, selctedColorDark)
+            fillTextLayer( 0, 0, selctedColorBright)
+        //})
 
-        // })
-        fillTextLayer( 80, 80, selctedColorDark)
-        fillTextLayer( 12, 40, selctedColorDark)
-        fillTextLayer( 8, 3, selctedColorDark)
-        fillTextLayer( 0, 0, selctedColorBright)
-        //ctx.fillText(text_board, canvas.width/2  + moveText, canvas.height/2);
-        // ctx.strokeStyle = selctedColor;
-        //ctx.strokeText(text_board, canvas.width/2 + moveText, canvas.height/2);
-        //moreLights( ()=>{ ctx.fillText(text_board, canvas.width/2  + moveText, canvas.height/2) })
     }
 
     function ajastWidthText(){
@@ -369,13 +362,10 @@
 
     function verticalBoard(){
         ajastVerticalText()
-        ctx.fillStyle = selctedColorBright;
-        ctx.shadowColor = selctedColor;
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 0;
-        ctx.shadowBlur = 20;
-        ctx.fillVerticalText(text_board, canvas.width/2, canvas.height/2  + moveText, 5);
-        moreLights( ()=>{ctx.fillVerticalText(text_board, canvas.width/2, canvas.height/2  + moveText , 5)})
+        fillTextLayer( 80, 80, selctedColorDark)
+        fillTextLayer( 12, 40, selctedColorDark)
+        fillTextLayer( 8, 3, selctedColorDark)
+        fillTextLayer( 0, 0, selctedColorBright)
     }
 
     function ajastVerticalText(){
@@ -390,25 +380,6 @@
         }
     }
 
-    function moreLights(fillText){
-        if(!selctedColor) return false 
-        // let blur_2_color = selctedColor.split(")")[0] + ', ' + blur_opacity +')'
-        // ctx.shadowColor = blur_2_color;
-        // ctx.shadowBlur = blur_2; 
-        // ctx.shadowOffsetX = 2;
-        // ctx.shadowOffsetY = 0;
-        // fillText()
-        // ctx.shadowOffsetX = 0;
-        // ctx.shadowOffsetY = 2;
-        // fillText()
-        // ctx.shadowOffsetX = -2;
-        // ctx.shadowOffsetY = 0;
-        // fillText()
-        // ctx.shadowOffsetX = 0;
-        // ctx.shadowOffsetY = -2;
-        // fillText()
-    }
-
     function renderBG(callback){
         imgBG.src = 'https://static.tildacdn.com/tild3236-6239-4133-a236-633331326230/Frame_296.png'
         imgBG.onload = function () {
@@ -418,12 +389,19 @@
     }
 
     function fillTextLayer( strokeWidth, blur, color ){
+        let useStroke = false
+        if(strokeWidth>0) useStroke = true 
         ctx.fillStyle = color;
         ctx.strokeStyle = color;
         ctx.lineWidth = strokeWidth
         ctx.filter = `blur(${blur}px)`;
-        ctx.fillText(text_board, canvas.width/2  + moveText, canvas.height/2);
-        if( strokeWidth > 0 ) ctx.strokeText(text_board, canvas.width/2 + moveText, canvas.height/2);   
+        if(borderHorizont){
+            ctx.fillText(text_board, canvas.width/2  + moveText, canvas.height/2);
+            if( useStroke ) ctx.strokeText(text_board, canvas.width/2 + moveText, canvas.height/2);   
+        }else{
+            
+            ctx.fillVerticalText(text_board, canvas.width/2, canvas.height/2  + moveText, 5, useStroke);
+        }
     }
 // -------------------------------------------  Calc Functions ------------------------------------------------------
 
