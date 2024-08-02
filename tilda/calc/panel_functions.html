@@ -5,6 +5,9 @@
     .btn_color, .btn_font{
         cursor: pointer;
     }
+    .btn_font .tn-atom:hover, .btn_more_size .tn-atom:hover, .t-radio__indicator:hover, .btn_submit_form .tn-atom:hover{
+        box-shadow: 0 0 33px 9px #78ddf4;
+    }
     .btn_font_selected .tn-atom{
         color: #fff!important;
         border-color: #78ddf4!important;
@@ -26,14 +29,39 @@
     [name="board_size"]{
         text-align: center;
     }
+    .tooltip{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 32px;
+        width: 120px;
+        font-family: 'Evolenta', Arial, sans-serif;
+        font-size: 12px;
+        background: #3d3d3d;
+        position: absolute;
+        top: -45px;
+        left: 15px;
+        border-radius: 50px;
+        border-bottom-left-radius: 0px;
+        color: #afafaf;
+        opacity: 0;
+        transition: opacity 0.2s linear;
+        pointer-events: none;
+    }
+    .tooltip.visible{
+        opacity: 1.0;
+        transition: opacity 0.2s linear;
+    }
 </style>
 
 <script>
     let configs, fonts, font_files = [], symbols, canvas, ctx;
-    let selctedColor, selectedFont, text_board = 'Текст', borderHorizont = true, board_width = 0, board_heigth = 0
+    let selctedColor, selctedColorBright = '#fff', selctedColorDark, selctedColorName, selectedFont, text_board = 'Текст', borderHorizont = true, board_width = 0, board_heigth = 0
     let verticalGap = 5
     let textBaseSize = 50, zoom = 0, zoomGap = 10, moveText = 0, moveGap = 50
     let blur_2 = 50, blur_opacity = 0.7
+
+    let imgBG = new Image();
 
     let k_px_mm = 50/146
     let mimSymbolExample = "W"
@@ -48,6 +76,8 @@
     let calcСoefficientLength = 0.5
     let summ
     let minSumm
+
+    let def_tetle_select_color
 
     const URL_CONFIGS = 'https://fancyneonservis.ru/php/read_config.php'
 	const URL_FONTS = 'https://fancyneonservis.ru/php/read_fonts.php'
@@ -200,10 +230,15 @@
     }
 
     function initColorPanel(){
+        def_tetle_select_color = $('.tetle_select_color .tn-atom').text()
         for(let i=0;i<=14;i++){
             $(`.select_color_${i}`).addClass('select_color')
             $(`.btn_color_${i}`).addClass('btn_color')
             $(`.btn_color_${i}`).attr({'indexColor':i})
+            let colorName =  $(`.btn_color_${i} .tn-atom`).attr('href') 
+            colorName = colorName?colorName.split("#")[1]:''
+            let tooltip = `<div class='tooltip'>${colorName}</div>`
+            $(`.btn_color_${i}`).append(tooltip)
         }
         
         $('.btn_color').click(function(){
@@ -211,7 +246,26 @@
             let indexColor = $(this).attr('indexColor')
             $(`.select_color_${indexColor}`).css({'opacity':'1.0'})
             selctedColor = $(`.btn_color_${indexColor} .tn-atom`).css('background-color')
+            selctedColorBright = $(`.bright_color_${indexColor} .tn-atom`).css('background-color')
+            selctedColorDark = $(`.dark_color_${indexColor} .tn-atom`).css('background-color')
+            selctedColorName = $(`.btn_color_${indexColor} .tn-atom`).attr('href').split("#")[1]
+            //$('.selctedColor .tn-atom').text(selctedColorName)
+            //$('.selctedColor .tn-atom').css({'color':selctedColor})
+            $('.tetle_select_color .tn-atom').text(`${def_tetle_select_color} ${selctedColorName}`)
             renderCanvas()
+        })
+
+        $('.btn_color').on( "mouseenter", function(event){
+            $(this).find('.tooltip').addClass('visible')
+            let color = $(this).find('.tn-atom').css('background-color')
+            $(this).find('.tooltip').css({'box-shadow': `0 0px 33px 9px ${color}`});
+            $(this).find('.tooltip').css({'border': `2px solid  ${color}`});
+        }).on( "mouseleave", function(event){
+            $(this).find('.tooltip').removeClass('visible')
+        });
+
+        $('.tooltip').on( "mouseenter", function(event){
+            event.stopPropagation();
         })
 
         $('.btn_color_1').click()
@@ -279,17 +333,25 @@
 
     function horizontalBoard(){
         ajastWidthText()
-        ctx.fillStyle = selctedColor;
-        ctx.shadowColor = selctedColor;
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 0;
-        ctx.shadowBlur = 20;
+        
+        //ctx.fillStyle = selctedColorBright;
+        // ctx.shadowColor = selctedColor;
+        // ctx.shadowOffsetX = 0;
+        // ctx.shadowOffsetY = 0;
+        // ctx.shadowBlur = 20;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(text_board, canvas.width/2  + moveText, canvas.height/2);
-        ctx.strokeStyle = selctedColor;
-        ctx.strokeText(text_board, canvas.width/2 + moveText, canvas.height/2);
-        moreLights( ()=>{ ctx.fillText(text_board, canvas.width/2  + moveText, canvas.height/2) })
+        // renderBG(()=>{
+
+        // })
+        fillTextLayer( 80, 80, selctedColorDark)
+        fillTextLayer( 12, 40, selctedColorDark)
+        fillTextLayer( 8, 3, selctedColorDark)
+        fillTextLayer( 0, 0, selctedColorBright)
+        //ctx.fillText(text_board, canvas.width/2  + moveText, canvas.height/2);
+        // ctx.strokeStyle = selctedColor;
+        //ctx.strokeText(text_board, canvas.width/2 + moveText, canvas.height/2);
+        //moreLights( ()=>{ ctx.fillText(text_board, canvas.width/2  + moveText, canvas.height/2) })
     }
 
     function ajastWidthText(){
@@ -307,7 +369,7 @@
 
     function verticalBoard(){
         ajastVerticalText()
-        ctx.fillStyle = selctedColor;
+        ctx.fillStyle = selctedColorBright;
         ctx.shadowColor = selctedColor;
         ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = 0;
@@ -330,21 +392,38 @@
 
     function moreLights(fillText){
         if(!selctedColor) return false 
-        let blur_2_color = selctedColor.split(")")[0] + ', ' + blur_opacity +')'
-        ctx.shadowColor = blur_2_color;
-        ctx.shadowBlur = blur_2; 
-        ctx.shadowOffsetX = 2;
-        ctx.shadowOffsetY = 0;
-        fillText()
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 2;
-        fillText()
-        ctx.shadowOffsetX = -2;
-        ctx.shadowOffsetY = 0;
-        fillText()
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = -2;
-        fillText()
+        // let blur_2_color = selctedColor.split(")")[0] + ', ' + blur_opacity +')'
+        // ctx.shadowColor = blur_2_color;
+        // ctx.shadowBlur = blur_2; 
+        // ctx.shadowOffsetX = 2;
+        // ctx.shadowOffsetY = 0;
+        // fillText()
+        // ctx.shadowOffsetX = 0;
+        // ctx.shadowOffsetY = 2;
+        // fillText()
+        // ctx.shadowOffsetX = -2;
+        // ctx.shadowOffsetY = 0;
+        // fillText()
+        // ctx.shadowOffsetX = 0;
+        // ctx.shadowOffsetY = -2;
+        // fillText()
+    }
+
+    function renderBG(callback){
+        imgBG.src = 'https://static.tildacdn.com/tild3236-6239-4133-a236-633331326230/Frame_296.png'
+        imgBG.onload = function () {
+            ctx.drawImage(imgBG, 0, 0);
+            callback()
+        }
+    }
+
+    function fillTextLayer( strokeWidth, blur, color ){
+        ctx.fillStyle = color;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = strokeWidth
+        ctx.filter = `blur(${blur}px)`;
+        ctx.fillText(text_board, canvas.width/2  + moveText, canvas.height/2);
+        if( strokeWidth > 0 ) ctx.strokeText(text_board, canvas.width/2 + moveText, canvas.height/2);   
     }
 // -------------------------------------------  Calc Functions ------------------------------------------------------
 
@@ -580,7 +659,7 @@ function renderCalcResult(width, height, summ){
 function fillSendForm(){
     $('[name=send_form_text]').val(text_board)
     $('[name=send_form_font]').val(selectedFont)
-    $('[name=send_form_color]').val(selctedColor)
+    $('[name=send_form_color]').val(selctedColorName)
     if( borderHorizont ){ orintation = 'horizontal' } else { orintation = 'vertical' }
     $('[name=send_form_orintation]').val(orintation)
     $('[name=send_form_board_size]').val(`${board_width} см X ${board_heigth} см`)
