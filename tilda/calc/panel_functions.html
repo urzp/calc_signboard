@@ -269,7 +269,7 @@
             event.stopPropagation();
         })
 
-        $('.btn_color_1').click()
+        $('.btn_color_4').click()
     }
 
     function initBorderOrintation(){
@@ -338,12 +338,9 @@
         ajastWidthText()
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        //renderBG(()=>{
-            fillTextLayer( 80, 80, selctedColorDark)
-            fillTextLayer( 12, 40, selctedColorDark)
-            fillTextLayer( 8, 3, selctedColorDark)
-            fillTextLayer( 0, 0, selctedColorBright)
-        //})
+        renderBG(()=>{
+            fillTextLayers()
+        })
 
     }
 
@@ -362,10 +359,9 @@
 
     function verticalBoard(){
         ajastVerticalText()
-        fillTextLayer( 80, 80, selctedColorDark)
-        fillTextLayer( 12, 40, selctedColorDark)
-        fillTextLayer( 8, 3, selctedColorDark)
-        fillTextLayer( 0, 0, selctedColorBright)
+        renderBG(()=>{
+            fillTextLayers()
+        })
     }
 
     function ajastVerticalText(){
@@ -380,12 +376,18 @@
         }
     }
 
-    function renderBG(callback){
+    async function renderBG(callback){
         imgBG.src = 'https://static.tildacdn.com/tild3236-6239-4133-a236-633331326230/Frame_296.png'
-        imgBG.onload = function () {
-            ctx.drawImage(imgBG, 0, 0);
-            callback()
-        }
+        await imgBG.onload 
+        await ctx.drawImage(imgBG, 0, 0);
+        callback()
+    }
+
+    function fillTextLayers(){
+        fillTextLayer( 80, 80, selctedColorDark)
+        fillTextLayer( 12, 40, selctedColorDark)
+        fillTextLayer( 8, 3, selctedColorDark)
+        fillTextLayer( 0, 0, selctedColorBright)
     }
 
     function fillTextLayer( strokeWidth, blur, color ){
