@@ -60,6 +60,18 @@
     let urlBG_img, urlBG_img_front_layer
     let verticalGap = 5
     let textBaseSize = 50, zoom = 0, zoomGap = 10, moveText = 0, moveGap = 50
+    let textCorrectionBG = {}
+    let textCorrectionBG1 = {
+        size_h: -10,
+        sizeMin_h: 40,
+        sizeMax_h: 70,
+        top_h: 30,
+        size_v: -10,
+        sizeMin_v: 30,
+        sizeMax_v: 50,
+        top_v: 0,
+        border_bottom: 86,
+    }
     let blur_2 = 50, blur_opacity = 0.7
 
     let imgBG = new Image();
@@ -96,6 +108,7 @@
 // -------------------------------------------  Init Functions ------------------------------------------------------
     
     async function init(){
+        imgBGSelect()
         await initData()
         await initCanvas()
         initConfigs()
@@ -161,11 +174,11 @@
 
         function initZommPanel(){
         $('.btn_zoom_plus').click(()=>{
-            zoom = zoom + zoomGap;
+            if(  getTextSize() < textCorrectionBG.sizeMax) zoom = zoom + zoomGap;
             renderCanvas()
         })
         $('.btn_zoom_minus').click(()=>{
-            zoom = zoom - zoomGap;
+            if(  getTextSize() > textCorrectionBG.sizeMin) zoom = zoom - zoomGap;
             renderCanvas()
         })
         $('.btn_zoom_reset').click(()=>{
@@ -334,6 +347,7 @@
 
 // -------------------------------------------  Render Functions ------------------------------------------------------
     function renderCanvas(){
+        imgBGSelect()
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         if(borderHorizont){ horizontalBoard() }else{ verticalBoard() }
     }
@@ -348,13 +362,33 @@
 
     }
 
+    function imgBGSelect(){
+        if(borderHorizont){
+            textCorrectionBG.correction = textCorrectionBG1.size_h
+            textCorrectionBG.sizeMax = textCorrectionBG1.sizeMax_h
+            textCorrectionBG.sizeMin = textCorrectionBG1.sizeMin_h
+            textCorrectionBG.top = textCorrectionBG1.top_h
+        }else{
+            textCorrectionBG.correction = textCorrectionBG1.size_v
+            textCorrectionBG.sizeMax = textCorrectionBG1.sizeMax_v
+            textCorrectionBG.sizeMin = textCorrectionBG1.sizeMin_v
+            textCorrectionBG.top = textCorrectionBG1.top_v        
+        }
+        textCorrectionBG.border_bottom = textCorrectionBG1.border_bottom
+        
+    }
+
+    function getTextSize(){
+       return Number(textBaseSize) + Number(textCorrectionBG.correction) + Number(zoom)
+    }
+
     function ajastWidthText(){
-        let textWidth, textSize, maxTextWidth = 450
-        textSize =  Number(textBaseSize) + Number(zoom)
+        let textWidth, textSize, maxTextWidth = canvas.width
+        textSize = getTextSize()
         ctx.font = `${textSize}px ${selectedFont}`
         textWidth = ctx.measureText(text_board).width
         textHeight = ctx.measureText(text_board).hangingBaseline
-        while( textWidth > maxTextWidth && zoom==0){
+        while( textWidth > maxTextWidth){
             ctx.font = `${textSize}px ${selectedFont}`;
             textWidth = ctx.measureText(text_board).width
             textSize--
@@ -369,11 +403,11 @@
     }
 
     function ajastVerticalText(){
-        let maxTextHegth = 300
+        let maxTextHegth = canvas.height - textCorrectionBG.border_bottom
         textSize =  Number(textBaseSize) + Number(zoom)
         ctx.font = `${textSize}px ${selectedFont}`
         textHeight = heightVeticalText(text_board, verticalGap)
-        while( textHeight > maxTextHegth && zoom==0){
+        while( textHeight > maxTextHegth ){
             ctx.font = `${textSize}px ${selectedFont}`;
             textHeight = heightVeticalText(text_board, verticalGap)
             textSize--
@@ -405,11 +439,11 @@
         ctx.lineWidth = strokeWidth
         ctx.filter = `blur(${blur}px)`;
         if(borderHorizont){
-            ctx.fillText(text_board, canvas.width/2  + moveText, canvas.height/2);
-            if( useStroke ) ctx.strokeText(text_board, canvas.width/2 + moveText, canvas.height/2);   
+            ctx.fillText(text_board, canvas.width/2  + moveText, (canvas.height - textCorrectionBG.border_bottom)/2  + textCorrectionBG.top);
+            if( useStroke ) ctx.strokeText(text_board, canvas.width/2 + moveText, (canvas.height - textCorrectionBG.border_bottom)/2 + textCorrectionBG.top);   
         }else{
             
-            ctx.fillVerticalText(text_board, canvas.width/2, canvas.height/2  + moveText, 5, useStroke);
+            ctx.fillVerticalText(text_board, canvas.width/2, (canvas.height - textCorrectionBG.border_bottom)/2  + moveText + textCorrectionBG.top, 5, useStroke);
         }
     }
 // -------------------------------------------  Calc Functions ------------------------------------------------------
@@ -610,14 +644,15 @@ function getMinFontSize(){
     let minHightSumbol = text_board.split('')[0]
     let minHight = ctx.measureText(minHightSumbol).actualBoundingBoxAscent + ctx.measureText(minHightSumbol).actualBoundingBoxDescent
     text_board.split('').forEach((e)=>{
-        let hightSymbol = ctx.measureText(e).actualBoundingBoxAscent + ctx.measureText(e).actualBoundingBoxDescent
-        if(hightSymbol < minHight){
-            minHight = hightSymbol
-            minHightSumbol = e
+        if(e!=" "){
+            let hightSymbol = ctx.measureText(e).actualBoundingBoxAscent + ctx.measureText(e).actualBoundingBoxDescent
+            if(hightSymbol < minHight){
+                minHight = hightSymbol
+                minHightSumbol = e
+            }
         }
     })
     leter_h = ctx.measureText(minHightSumbol).width
-    
     while (leter_h < minSymbolSize_mm/k_px_mm){
         ctx.font = `${findSize}px ${selectedFont}`
         let leter_measure = ctx.measureText(minHightSumbol)
