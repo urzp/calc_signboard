@@ -63,10 +63,10 @@
     let textCorrectionBG = {}
     let textCorrectionBG1 = {
         size_h: -10,
-        sizeMin_h: 40,
-        sizeMax_h: 70,
+        sizeMin_h: -30,
+        sizeMax_h: 30,
         top_h: 30,
-        size_v: -10,
+        size_v: -30,
         sizeMin_v: 30,
         sizeMax_v: 50,
         top_v: 0,
@@ -174,11 +174,11 @@
 
         function initZommPanel(){
         $('.btn_zoom_plus').click(()=>{
-            if(  getTextSize() < textCorrectionBG.sizeMax) zoom = zoom + zoomGap;
+            if(  zoom < textCorrectionBG.sizeMax) zoom = zoom + zoomGap;
             renderCanvas()
         })
         $('.btn_zoom_minus').click(()=>{
-            if(  getTextSize() > textCorrectionBG.sizeMin) zoom = zoom - zoomGap;
+            if(  zoom > textCorrectionBG.sizeMin) zoom = zoom - zoomGap;
             renderCanvas()
         })
         $('.btn_zoom_reset').click(()=>{
