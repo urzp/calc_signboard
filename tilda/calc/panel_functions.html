@@ -57,11 +57,13 @@
 <script>
     let configs, fonts, font_files = [], symbols, canvas, ctx;
     let selctedColor, selctedColorBright = '#fff', selctedColorDark, selctedColorName, selectedFont, text_board = 'Текст', borderHorizont = true, board_width = 0, board_heigth = 0
+    let urlBG_img, urlBG_img_front_layer
     let verticalGap = 5
     let textBaseSize = 50, zoom = 0, zoomGap = 10, moveText = 0, moveGap = 50
     let blur_2 = 50, blur_opacity = 0.7
 
     let imgBG = new Image();
+    let imgBGLayerFront = new Image();
 
     let k_px_mm = 50/146
     let mimSymbolExample = "W"
@@ -250,6 +252,8 @@
             selctedColorBright = $(`.bright_color_${indexColor} .tn-atom`).css('background-color')
             selctedColorDark = $(`.dark_color_${indexColor} .tn-atom`).css('background-color')
             selctedColorName = $(`.btn_color_${indexColor} .tn-atom`).attr('href').split("#")[1]
+            urlBG_img = $(`.BG_img_small_${indexColor} .tn-atom__img`).attr('src')
+            urlBG_img_front_layer = $(`.BG_img_small_front_${indexColor} .tn-atom__img`).attr('src')
             //$('.selctedColor .tn-atom').text(selctedColorName)
             //$('.selctedColor .tn-atom').css({'color':selctedColor})
             $('.tetle_select_color .tn-atom').text(`${def_tetle_select_color} ${selctedColorName}`)
@@ -377,10 +381,13 @@
     }
 
     async function renderBG(callback){
-        imgBG.src = 'https://static.tildacdn.com/tild3236-6239-4133-a236-633331326230/Frame_296.png'
+        imgBG.src = urlBG_img 
         await imgBG.onload 
         await ctx.drawImage(imgBG, 0, 0);
-        callback()
+        await callback()
+        imgBGLayerFront.src = urlBG_img_front_layer
+        await imgBGLayerFront.onload 
+        await ctx.drawImage(imgBGLayerFront, 0, 0);
     }
 
     function fillTextLayers(){

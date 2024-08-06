@@ -1,0 +1,28 @@
+<style>
+    .t778__col.no_active{
+        opacity: 0.3;
+        transition: opacity 0.3s;
+    }
+    .t778__col{
+        transition: opacity 0.3s;
+    }
+</style>
+
+
+<script>
+    let x_min = -200
+    let x_max = x_min + $('.t778__col.t-col_4').width() + 20
+
+    if($(window).width()<=640) setInterval(chekPosition, 300)
+    function chekPosition(){
+        $('.t778__col.t-col_4').each(function(){
+            let x_pos = $(this).offset().left
+            if( x_pos >= x_min && x_pos <= x_max ){
+                $(this).removeClass('no_active')
+            }else{
+                $(this).addClass('no_active')
+            }
+        })
+    }
+
+</script>
