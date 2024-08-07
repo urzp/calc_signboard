@@ -60,7 +60,7 @@
     let canvasTextSize
     let urlBG_img, urlBG_img_front_layer
     let verticalGap = 5
-    let textBaseSize = 50, zoom = 0, zoomGap = 1, moveText = 0, moveGap = 50
+    let textBaseSize = 50, zoom = 0, zoomGap = 1, moveText = 0, moveGap_x = 50, moveGap_y = 10
     let textCorrectionBG = {}
     let textCorrectionBG1 = {
         width_mm: 900,
@@ -210,11 +210,21 @@
 
     function initMovePanel(){
         $('.btn_move_plus').click(()=>{
-            moveText = moveText + moveGap;
+            if(borderHorizont){
+                moveText = moveText + moveGap_x;
+            }else{
+                let next_y = (canvas.height - textCorrectionBG.border_bottom)/2  + moveText + textCorrectionBG.top + heightVeticalText(text_board, verticalGap)/2  + moveGap_y
+                if(next_y < canvas.height - textCorrectionBG1.border_bottom ) moveText = moveText + moveGap_y;
+            }
             renderCanvas()
         })
         $('.btn_move_minus').click(()=>{
-            moveText = moveText - moveGap;
+            if(borderHorizont){
+                moveText = moveText - moveGap_x;
+            }else{
+                let next_y = (canvas.height - textCorrectionBG.border_bottom)/2  + moveText + textCorrectionBG.top - heightVeticalText(text_board, verticalGap)/2  - moveGap_y
+                if ( next_y > 0) moveText = moveText - moveGap_y;
+            }
             renderCanvas()
         })
         $('.btn_move_reset').click(()=>{
