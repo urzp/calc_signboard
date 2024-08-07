@@ -57,19 +57,22 @@
 <script>
     let configs, fonts, font_files = [], symbols, canvas, ctx;
     let selctedColor, selctedColorBright = '#fff', selctedColorDark, selctedColorName, selectedFont, text_board = 'Текст', borderHorizont = true, board_width = 0, board_heigth = 0
+    let canvasTextSize
     let urlBG_img, urlBG_img_front_layer
     let verticalGap = 5
-    let textBaseSize = 50, zoom = 0, zoomGap = 10, moveText = 0, moveGap = 50
+    let textBaseSize = 50, zoom = 0, zoomGap = 1, moveText = 0, moveGap = 50
     let textCorrectionBG = {}
     let textCorrectionBG1 = {
-        size_h: -10,
-        sizeMin_h: -30,
-        sizeMax_h: 30,
-        top_h: 30,
-        size_v: -30,
-        sizeMin_v: 30,
-        sizeMax_v: 50,
-        top_v: 0,
+        width_mm: 900,
+        scale_p_mm: 3,
+        begin_size: 0,
+        sizeMin_w: -30,
+        sizeMax_w: 50,
+        top_w: 30,
+        size_h: -30,
+        sizeMin_h: 30,
+        sizeMax_h: 50,
+        top_h: 0,
         border_bottom: 86,
     }
     let blur_2 = 50, blur_opacity = 0.7
@@ -92,6 +95,7 @@
     let minSumm
 
     let def_tetle_select_color
+    let panel_board_seize_stop_change = false
 
     const URL_CONFIGS = 'https://fancyneonservis.ru/php/read_config.php'
 	const URL_FONTS = 'https://fancyneonservis.ru/php/read_fonts.php'
@@ -137,6 +141,7 @@
             canvas.width = $('#canvas').parent().width()
         }
         canvas.height = $('#canvas').parent().height()
+        textCorrectionBG1.scale_p_mm = textCorrectionBG1.width_mm / canvas.width
         
         CanvasRenderingContext2D.prototype.fillVerticalText =
         function(text, x, y, verticalSpacing, useStroke=false) {
@@ -165,6 +170,11 @@
         ready_t_element( '[name="text_board"]', ()=>{
             $('[name="text_board"]').on( 'input', async function(){
                 text_board = $(this).val()
+                if(borderHorizont){
+                    $('[name="board_size"]').val( getHorizontalBoardWith() / 10 )
+                }else{
+                    $('[name="board_size"]').val( getVerticaltBoardHieght() / 10 )
+                }
                 calcBoard()
                 renderCanvas()
             })
@@ -174,17 +184,28 @@
 
         function initZommPanel(){
         $('.btn_zoom_plus').click(()=>{
-            if(  zoom < textCorrectionBG.sizeMax) zoom = zoom + zoomGap;
+            let carentSeize = Math.round( Number( $('[name="board_size"]').val() ) )
+            if( carentSeize == 0) carentSeize = getBoardSize() / 10
+            $('[name="board_size"]').val( Math.round( carentSeize + zoomGap ) )
+            calcBoard()
             renderCanvas()
         })
         $('.btn_zoom_minus').click(()=>{
-            if(  zoom > textCorrectionBG.sizeMin) zoom = zoom - zoomGap;
+            let carentSeize = Math.round( Number( $('[name="board_size"]').val() ) )
+            let minSize = getBoardSize() / 10
+            if( carentSeize == 0) carentSeize = minSize
+            if(Math.round( carentSeize - zoomGap ) < minSize) return false
+            $('[name="board_size"]').val( Math.round( carentSeize - zoomGap ) )
+            calcBoard()
             renderCanvas()
         })
         $('.btn_zoom_reset').click(()=>{
-            zoom=0;
+            carentSeize = getBoardSize() / 10
+            $('[name="board_size"]').val( carentSeize )
+            calcBoard()
             renderCanvas()
         })
+
     }
 
     function initMovePanel(){
@@ -327,6 +348,7 @@
             $('[name="board_size"]').attr({'type':'number'})
             calcHorizontBoard()
             $('[name="board_size"]').on("change", function(){
+                if(panel_board_seize_stop_change) return false
                 calcBoard()
                 renderCanvas()
             })
@@ -364,25 +386,37 @@
 
     function imgBGSelect(){
         if(borderHorizont){
+            textCorrectionBG.correction = textCorrectionBG1.begin_size
+            textCorrectionBG.sizeMax = textCorrectionBG1.sizeMax_w
+            textCorrectionBG.sizeMin = textCorrectionBG1.sizeMin_w
+            textCorrectionBG.top = textCorrectionBG1.top_w
+        }else{
             textCorrectionBG.correction = textCorrectionBG1.size_h
             textCorrectionBG.sizeMax = textCorrectionBG1.sizeMax_h
             textCorrectionBG.sizeMin = textCorrectionBG1.sizeMin_h
-            textCorrectionBG.top = textCorrectionBG1.top_h
-        }else{
-            textCorrectionBG.correction = textCorrectionBG1.size_v
-            textCorrectionBG.sizeMax = textCorrectionBG1.sizeMax_v
-            textCorrectionBG.sizeMin = textCorrectionBG1.sizeMin_v
-            textCorrectionBG.top = textCorrectionBG1.top_v        
+            textCorrectionBG.top = textCorrectionBG1.top_h        
         }
         textCorrectionBG.border_bottom = textCorrectionBG1.border_bottom
-        
+        textCorrectionBG.scale_p_mm = textCorrectionBG1.scale_p_mm
     }
 
     function getTextSize(){
        return Number(textBaseSize) + Number(textCorrectionBG.correction) + Number(zoom)
     }
 
+    function ajastSizeText(){
+        canvasTextSize = calcFontSize * k_px_mm / textCorrectionBG.scale_p_mm
+        if(canvasTextSize==0){
+            canvasTextSize = getMinFontSize()  * k_px_mm / textCorrectionBG.scale_p_mm
+        }
+    }
+
     function ajastWidthText(){
+        ajastSizeText()
+        ctx.font = `${canvasTextSize}px ${selectedFont}`
+    }
+
+    function ajastWidthText_(){
         let textWidth, textSize, maxTextWidth = canvas.width
         textSize = getTextSize()
         ctx.font = `${textSize}px ${selectedFont}`
@@ -393,6 +427,7 @@
             textWidth = ctx.measureText(text_board).width
             textSize--
         }
+        canvasTextSize = textSize
     }
 
     function verticalBoard(){
@@ -403,6 +438,11 @@
     }
 
     function ajastVerticalText(){
+        ajastSizeText()
+        ctx.font = `${canvasTextSize}px ${selectedFont}`     
+    }
+
+    function ajastVerticalText_(){
         let maxTextHegth = canvas.height - textCorrectionBG.border_bottom
         textSize =  Number(textBaseSize) + Number(zoom)
         ctx.font = `${textSize}px ${selectedFont}`
@@ -561,6 +601,14 @@ function calcFontSizeHorizontalBoard(){
     return fontSize
 }   
 
+function getBoardSize(){
+    if(borderHorizont){
+        return getHorizontalBoardWith()
+    }else{
+        return getVerticaltBoardHieght()
+    }
+}
+
 function getHorizontalBoardWith(fontSize = getMinFontSize()){
     ctx.font = `${fontSize}px ${selectedFont}`
     lenghText = ctx.measureText(text_board).width
@@ -685,7 +733,7 @@ function fillSendForm(){
     if( borderHorizont ){ orintation = 'horizontal' } else { orintation = 'vertical' }
     $('[name=send_form_orintation]').val(orintation)
     $('[name=send_form_board_size]').val(`${board_width} см X ${board_heigth} см`)
-    $('[name=send_form_price]').val(`${summ} р.`)
+    $('[name=send_form_price]').val(`${summ} р.`)   
 }
 
 
