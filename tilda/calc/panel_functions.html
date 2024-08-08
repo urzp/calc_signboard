@@ -63,7 +63,7 @@
     let textBaseSize = 50, zoom = 0, zoomGap = 1, moveText = 0, moveGap_x = 20, moveGap_y = 10
     let selectImgBG = 1
     let swithcBoard = {
-        wide: 360,
+        wide: 390,
         heigth: 300,
     }
     let classesImgBG = [
@@ -437,10 +437,10 @@
     }
 
     function selectBG(){
-        if(borderHorizont){
-            if( getHorizontalBoardWith(calcFontSize) > swithcBoard.wide ){ selectImgBG = 2 }else{ selectImgBG = 1 }
-        }else{
-            if( getVerticaltBoardHieght(calcFontSize) > swithcBoard.heigth ){ selectImgBG = 2 }else{ selectImgBG = 1 }
+        if( getHorizontalBoardWith(calcFontSize) > swithcBoard.wide || getVerticaltBoardHieght(calcFontSize) > swithcBoard.heigth  ){ 
+            selectImgBG = 2 
+        }else{ 
+            selectImgBG = 1 
         }
         imgBGSelect()
     }
@@ -514,6 +514,11 @@
         fillTextLayer( 12, 40, selctedColorDark)
         fillTextLayer( 8, 3, selctedColorDark)
         fillTextLayer( 0, 0, selctedColorBright)
+        // let avgTextSize = canvasTextSize 
+        // fillTextLayer( avgTextSize * 1.6, avgTextSize * 1.6, selctedColorDark)
+        // fillTextLayer( avgTextSize * 0.24, avgTextSize * 0.8, selctedColorDark)
+        // fillTextLayer( avgTextSize * 0.16, avgTextSize * 0.06, selctedColorDark)
+        // fillTextLayer( 0, 0, selctedColorBright)
     }
 
     function fillTextLayer( strokeWidth, blur, color ){
@@ -527,8 +532,15 @@
             ctx.fillText(text_board, canvas.width/2  + moveText, (canvas.height - textCorrectionBG.border_bottom)/2  + textCorrectionBG.top);
             if( useStroke ) ctx.strokeText(text_board, canvas.width/2 + moveText, (canvas.height - textCorrectionBG.border_bottom)/2 + textCorrectionBG.top);   
         }else{
+            if( ifOverSizeTextToBG() ){
+                let heigthText = heightVeticalText(text_board, verticalGap)
+                let correction = heigthText - (canvas.height - textCorrectionBG.border_bottom)
+                correction = correction/2 + 15
+                ctx.fillVerticalText(text_board, canvas.width/2, (canvas.height - textCorrectionBG.border_bottom)/2 - correction + textCorrectionBG.top , 5, useStroke);
+            }else{
+                ctx.fillVerticalText(text_board, canvas.width/2, (canvas.height - textCorrectionBG.border_bottom)/2  + moveText + textCorrectionBG.top, 5, useStroke);
+            }
             
-            ctx.fillVerticalText(text_board, canvas.width/2, (canvas.height - textCorrectionBG.border_bottom)/2  + moveText + textCorrectionBG.top, 5, useStroke);
         }
     }
 // -------------------------------------------  Calc Functions ------------------------------------------------------
@@ -783,6 +795,13 @@ function fillSendForm(){
 
 
 // -------------------------------------------  Suport Functions ------------------------------------------------------
+
+    function ifOverSizeTextToBG(){
+        if(selectImgBG == 2 && !borderHorizont ){
+            if(canvas.height - textCorrectionBG_Images[1].border_bottom < heightVeticalText(text_board, verticalGap) + 30) return true
+        }
+        return false
+    }
 
     function heightVeticalText(text,verticalSpacing){
         let heightVeticalText = 0
