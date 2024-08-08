@@ -56,25 +56,45 @@
 
 <script>
     let configs, fonts, font_files = [], symbols, canvas, ctx;
-    let selctedColor, selctedColorBright = '#fff', selctedColorDark, selctedColorName, selectedFont, text_board = 'Текст', borderHorizont = true, board_width = 0, board_heigth = 0
+    let selctedColor, indexColor, selctedColorBright = '#fff', selctedColorDark, selctedColorName, selectedFont, text_board = 'Текст', borderHorizont = true, board_width = 0, board_heigth = 0
     let canvasTextSize
     let urlBG_img, urlBG_img_front_layer
     let verticalGap = 5
-    let textBaseSize = 50, zoom = 0, zoomGap = 1, moveText = 0, moveGap_x = 50, moveGap_y = 10
-    let textCorrectionBG = {}
-    let textCorrectionBG1 = {
-        width_mm: 900,
-        scale_p_mm: 3,
-        begin_size: 0,
-        sizeMin_w: -30,
-        sizeMax_w: 50,
-        top_w: 30,
-        size_h: -30,
-        sizeMin_h: 30,
-        sizeMax_h: 50,
-        top_h: 0,
-        border_bottom: 86,
+    let textBaseSize = 50, zoom = 0, zoomGap = 1, moveText = 0, moveGap_x = 20, moveGap_y = 10
+    let selectImgBG = 1
+    let swithcBoard = {
+        wide: 360,
+        heigth: 300,
     }
+    let classesImgBG = [
+        {
+            base: 'BG_img_small_',
+            front:'BG_img_small_front_'
+        },
+        {
+            base: 'BG_img_',
+            front: ''
+        }
+    ]
+    let textCorrectionBG = {}
+    let textCorrectionBG_Images = [
+        {
+            width_mm: 900,
+            scale_p_mm: 0,
+            top_horizont: 30,
+            top_vertical: 0,
+            zoomGap: 1,
+            border_bottom: 86,
+        },
+        {
+            width_mm: 2400,
+            scale_p_mm: 0,
+            top_horizont: 20,
+            top_vertical: 0,
+            zoomGap: 5,
+            border_bottom: 125,
+        }
+    ]
     let blur_2 = 50, blur_opacity = 0.7
 
     let imgBG = new Image();
@@ -141,7 +161,10 @@
             canvas.width = $('#canvas').parent().width()
         }
         canvas.height = $('#canvas').parent().height()
-        textCorrectionBG1.scale_p_mm = textCorrectionBG1.width_mm / canvas.width
+
+        textCorrectionBG_Images.forEach(el=>{
+            el.scale_p_mm = el.width_mm / canvas.width
+        })
         
         CanvasRenderingContext2D.prototype.fillVerticalText =
         function(text, x, y, verticalSpacing, useStroke=false) {
@@ -182,7 +205,7 @@
         })
     }
 
-        function initZommPanel(){
+    function initZommPanel(){
         $('.btn_zoom_plus').click(()=>{
             let carentSeize = Math.round( Number( $('[name="board_size"]').val() ) )
             if( carentSeize == 0) carentSeize = getBoardSize() / 10
@@ -214,7 +237,7 @@
                 moveText = moveText + moveGap_x;
             }else{
                 let next_y = (canvas.height - textCorrectionBG.border_bottom)/2  + moveText + textCorrectionBG.top + heightVeticalText(text_board, verticalGap)/2  + moveGap_y
-                if(next_y < canvas.height - textCorrectionBG1.border_bottom ) moveText = moveText + moveGap_y;
+                if(next_y < canvas.height - textCorrectionBG.border_bottom ) moveText = moveText + moveGap_y;
             }
             renderCanvas()
         })
@@ -290,14 +313,13 @@
         
         $('.btn_color').click(function(){
             $(`.select_color`).css({'opacity':'0.0'})
-            let indexColor = $(this).attr('indexColor')
+            indexColor = $(this).attr('indexColor')
             $(`.select_color_${indexColor}`).css({'opacity':'1.0'})
             selctedColor = $(`.btn_color_${indexColor} .tn-atom`).css('background-color')
             selctedColorBright = $(`.bright_color_${indexColor} .tn-atom`).css('background-color')
             selctedColorDark = $(`.dark_color_${indexColor} .tn-atom`).css('background-color')
             selctedColorName = $(`.btn_color_${indexColor} .tn-atom`).attr('href').split("#")[1]
-            urlBG_img = $(`.BG_img_small_${indexColor} .tn-atom__img`).attr('src')
-            urlBG_img_front_layer = $(`.BG_img_small_front_${indexColor} .tn-atom__img`).attr('src')
+            imgBGSelect()
             //$('.selctedColor .tn-atom').text(selctedColorName)
             //$('.selctedColor .tn-atom').css({'color':selctedColor})
             $('.tetle_select_color .tn-atom').text(`${def_tetle_select_color} ${selctedColorName}`)
@@ -379,7 +401,8 @@
 
 // -------------------------------------------  Render Functions ------------------------------------------------------
     function renderCanvas(){
-        imgBGSelect()
+        selectBG()
+        textCorrectionBGSelect()
         ctx.clearRect(0, 0, canvas.width, canvas.height)
         if(borderHorizont){ horizontalBoard() }else{ verticalBoard() }
     }
@@ -395,19 +418,31 @@
     }
 
     function imgBGSelect(){
+        let baseClass = classesImgBG[selectImgBG - 1].base
+        let front = classesImgBG[selectImgBG - 1].front
+        urlBG_img = $(`.${baseClass}${indexColor} .tn-atom__img`).attr('src')
+        urlBG_img_front_layer = $(`.${front}${indexColor} .tn-atom__img`).attr('src')
+    }
+
+    function textCorrectionBGSelect(){
+        let selectedDataBG = textCorrectionBG_Images[selectImgBG - 1]
         if(borderHorizont){
-            textCorrectionBG.correction = textCorrectionBG1.begin_size
-            textCorrectionBG.sizeMax = textCorrectionBG1.sizeMax_w
-            textCorrectionBG.sizeMin = textCorrectionBG1.sizeMin_w
-            textCorrectionBG.top = textCorrectionBG1.top_w
+            textCorrectionBG.top = selectedDataBG.top_horizont
         }else{
-            textCorrectionBG.correction = textCorrectionBG1.size_h
-            textCorrectionBG.sizeMax = textCorrectionBG1.sizeMax_h
-            textCorrectionBG.sizeMin = textCorrectionBG1.sizeMin_h
-            textCorrectionBG.top = textCorrectionBG1.top_h        
+            textCorrectionBG.top = selectedDataBG.top_vertical        
         }
-        textCorrectionBG.border_bottom = textCorrectionBG1.border_bottom
-        textCorrectionBG.scale_p_mm = textCorrectionBG1.scale_p_mm
+        textCorrectionBG.border_bottom = selectedDataBG.border_bottom
+        textCorrectionBG.scale_p_mm = selectedDataBG.scale_p_mm
+        zoomGap = selectedDataBG.zoomGap
+    }
+
+    function selectBG(){
+        if(borderHorizont){
+            if( getHorizontalBoardWith(calcFontSize) > swithcBoard.wide ){ selectImgBG = 2 }else{ selectImgBG = 1 }
+        }else{
+            if( getVerticaltBoardHieght(calcFontSize) > swithcBoard.heigth ){ selectImgBG = 2 }else{ selectImgBG = 1 }
+        }
+        imgBGSelect()
     }
 
     function getTextSize(){
