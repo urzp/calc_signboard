@@ -64,6 +64,7 @@
 </style>
 
 <script>
+let rendeFlag
 let configs, fonts, font_files = [], symbols, canvas, ctx;
 let selctedColor, indexColor, selctedColorBright = '#fff', selctedColorDark, selctedColorName, selectedFont, text_board = 'Текст', borderHorizont = true, board_width = 0, board_heigth = 0
 let canvasTextSize
@@ -165,6 +166,7 @@ async function init(){
     intSizeBoardPanel()
     intSendForm()
     fillSendForm()
+    intRenderInterval()
 }
 
 function initCanvas(){
@@ -435,13 +437,22 @@ function intSendForm(){
     })
 }
 
+function intRenderInterval(){
+    setInterval(()=>{
+        if(rendeFlag) return false
+        renderCanvas()
+    },500)
+}
+
 // -------------------------------------------  Render Functions ------------------------------------------------------
 
-function renderCanvas(){
-    selectBG()
-    textCorrectionBGSelect()
+async function renderCanvas(){
+    rendeFlag = true
+    await selectBG()
+    await textCorrectionBGSelect()
     ctx.clearRect(0, 0, canvas.width, canvas.height)
-    if(borderHorizont){ horizontalBoard() }else{ verticalBoard() }
+    if(borderHorizont){ await  horizontalBoard() }else{ await  verticalBoard() }
+    rendeFlag = false
 }
 
 function horizontalBoard(){
