@@ -55,75 +55,75 @@
 </style>
 
 <script>
-    let configs, fonts, font_files = [], symbols, canvas, ctx;
-    let selctedColor, indexColor, selctedColorBright = '#fff', selctedColorDark, selctedColorName, selectedFont, text_board = 'Текст', borderHorizont = true, board_width = 0, board_heigth = 0
-    let canvasTextSize
-    let urlBG_img, urlBG_img_front_layer
-    let verticalGap = 5
-    let textBaseSize = 50, zoom = 0, zoomGap = 1, moveText = 0, moveGap_x = 20, moveGap_y = 10
-    let selectImgBG = 1
-    let swithcBoard = {
-        wide: 390,
-        heigth: 300,
+let configs, fonts, font_files = [], symbols, canvas, ctx;
+let selctedColor, indexColor, selctedColorBright = '#fff', selctedColorDark, selctedColorName, selectedFont, text_board = 'Текст', borderHorizont = true, board_width = 0, board_heigth = 0
+let canvasTextSize
+let urlBG_img, urlBG_img_front_layer
+let verticalGap = 5
+let textBaseSize = 50, zoom = 0, zoomGap = 1, moveText = 0, moveGap_x = 20, moveGap_y = 10
+let selectImgBG = 1
+let swithcBoard = {
+    wide: 390,
+    heigth: 300,
+}
+let classesImgBG = [
+    {
+        base: 'BG_img_small_',
+        front:'BG_img_small_front_'
+    },
+    {
+        base: 'BG_img_',
+        front: ''
     }
-    let classesImgBG = [
-        {
-            base: 'BG_img_small_',
-            front:'BG_img_small_front_'
-        },
-        {
-            base: 'BG_img_',
-            front: ''
-        }
-    ]
-    let textCorrectionBG = {}
-    let textCorrectionBG_Images = [
-        {
-            width_mm: 900,
-            scale_p_mm: 0,
-            top_horizont: 30,
-            top_vertical: 0,
-            zoomGap: 1,
-            border_bottom: 86,
-        },
-        {
-            width_mm: 2400,
-            scale_p_mm: 0,
-            top_horizont: 20,
-            top_vertical: 0,
-            zoomGap: 5,
-            border_bottom: 125,
-        }
-    ]
-    let blur_2 = 50, blur_opacity = 0.7
+]
+let textCorrectionBG = {}
+let textCorrectionBG_Images = [
+    {
+        width_mm: 900,
+        scale_p_mm: 0,
+        top_horizont: 30,
+        top_vertical: 0,
+        zoomGap: 1,
+        border_bottom: 86,
+    },
+    {
+        width_mm: 2400,
+        scale_p_mm: 0,
+        top_horizont: 20,
+        top_vertical: 0,
+        zoomGap: 5,
+        border_bottom: 125,
+    }
+]
+let blur_2 = 50, blur_opacity = 0.7
 
-    let imgBG = new Image();
-    let imgBGLayerFront = new Image();
+let imgBG = new Image();
+let imgBGLayerFront = new Image();
 
-    let k_px_mm = 50/146
-    let mimSymbolExample = "W"
-    let minSymbolSize_mm = 50
-    let maxSymbolSize_mm = 300
-    let maxSymbolSize_px
-    let board_padding_mm = 0
+let k_px_mm = 50/146
+let mimSymbolExample = "W"
+let minSymbolSize_mm = 50
+let maxSymbolSize_mm = 300
+let maxSymbolSize_px
+let board_padding_mm = 0
 
-    let calcBaseFont 
-    let lengthPrice
-    let calcFontSize
-    let calcСoefficientLength = 0.5
-    let summ
-    let minSumm
+let calcBaseFont 
+let lengthPrice
+let calcFontSize
+let calcСoefficientLength = 0.5
+let summ
+let minSumm
 
-    let def_tetle_select_color
-    let panel_board_seize_stop_change = false
+let def_tetle_select_color
+let panel_board_seize_stop_change = false
 
-    const URL_CONFIGS = 'https://fancyneonservis.ru/php/read_config.php'
-	const URL_FONTS = 'https://fancyneonservis.ru/php/read_fonts.php'
-    const URL_SYMBOLS = 'https://fancyneonservis.ru/php/read_symbols.php'
-    const URL_FONTS_FILE = 'https://fancyneonservis.ru/fonts/getFont.php'
-    const AJAX_OPTIONS = { type: 'POST', headers: { 'Content-Type': 'application/json;charset=utf-8' } }
+const URL_CONFIGS = 'https://fancyneonservis.ru/php/read_config.php'
+const URL_FONTS = 'https://fancyneonservis.ru/php/read_fonts.php'
+const URL_SYMBOLS = 'https://fancyneonservis.ru/php/read_symbols.php'
+const URL_FONTS_FILE = 'https://fancyneonservis.ru/fonts/getFont.php'
+const AJAX_OPTIONS = { type: 'POST', headers: { 'Content-Type': 'application/json;charset=utf-8' } }
 
-    $( document ).ready(function(){ init() })
+$( document ).ready(function(){ init() })
 
 //---------------------------------------------- work space --------------------------------------------------------
 
@@ -131,418 +131,420 @@
 
 // -------------------------------------------  Init Functions ------------------------------------------------------
     
-    async function init(){
-        imgBGSelect()
-        await initData()
-        await initCanvas()
-        initConfigs()
-        iniStopSub()
-        initTextImput()
-        initFontsPanel()
-        initColorPanel()
-        initBorderOrintation()
-        initZommPanel()
-        initMovePanel()
-        intSizeBoardPanel()
-        intSendForm()
-        fillSendForm()
-    }
+async function init(){
+    imgBGSelect()
+    await initData()
+    await initCanvas()
+    initConfigs()
+    iniStopSub()
+    initTextImput()
+    initFontsPanel()
+    initColorPanel()
+    initBorderOrintation()
+    initZommPanel()
+    initMovePanel()
+    intSizeBoardPanel()
+    intSendForm()
+    fillSendForm()
+}
 
-    function initCanvas(){
-        canvas = document.getElementById("canvas");
-        ctx = canvas.getContext("2d")
-        // TILDA html blok bag wide < 480
-        if( $(window).width() < 480 ){
-            let width = $('.canvas_border').width()
-            $('.t_canvas .tn-atom').css({'width':width +'px'})
-            $('.t_canvas').css({'width':width +'px'})
-            canvas.width = width
-        }else{
-            canvas.width = $('#canvas').parent().width()
+function initCanvas(){
+    canvas = document.getElementById("canvas");
+    ctx = canvas.getContext("2d")
+    // TILDA html blok bag wide < 480
+    if( $(window).width() < 480 ){
+        let width = $('.canvas_border').width()
+        $('.t_canvas .tn-atom').css({'width':width +'px'})
+        $('.t_canvas').css({'width':width +'px'})
+        canvas.width = width
+    }else{
+        canvas.width = $('#canvas').parent().width()
+    }
+    canvas.height = $('#canvas').parent().height()
+
+    textCorrectionBG_Images.forEach(el=>{
+        el.scale_p_mm = el.width_mm / canvas.width
+    })
+    
+    CanvasRenderingContext2D.prototype.fillVerticalText =
+    function(text, x, y, verticalSpacing, useStroke=false) {
+        let metrics, priviosSymbolHeight = 0, startSymbolYpos = 0
+        y = y - heightVeticalText(text,verticalSpacing)/2
+        for (var i = 0; i < text.length; i++) {
+            metrics = this.measureText(text[i]);
+            startSymbolYpos = startSymbolYpos + metrics.actualBoundingBoxAscent
+            this.fillText(text[i], x, y + ( startSymbolYpos ));
+            if( useStroke ) this.strokeText(text[i], x, y + ( startSymbolYpos ));
+            startSymbolYpos = startSymbolYpos + metrics.actualBoundingBoxDescent + verticalSpacing
+            if(text[i]==" ") startSymbolYpos = startSymbolYpos + verticalSpacing * 5
         }
-        canvas.height = $('#canvas').parent().height()
-
-        textCorrectionBG_Images.forEach(el=>{
-            el.scale_p_mm = el.width_mm / canvas.width
-        })
-        
-        CanvasRenderingContext2D.prototype.fillVerticalText =
-        function(text, x, y, verticalSpacing, useStroke=false) {
-            let metrics, priviosSymbolHeight = 0, startSymbolYpos = 0
-            y = y - heightVeticalText(text,verticalSpacing)/2
-            for (var i = 0; i < text.length; i++) {
-                metrics = this.measureText(text[i]);
-                startSymbolYpos = startSymbolYpos + metrics.actualBoundingBoxAscent
-                this.fillText(text[i], x, y + ( startSymbolYpos ));
-                if( useStroke ) this.strokeText(text[i], x, y + ( startSymbolYpos ));
-                startSymbolYpos = startSymbolYpos + metrics.actualBoundingBoxDescent + verticalSpacing
-                if(text[i]==" ") startSymbolYpos = startSymbolYpos + verticalSpacing * 5
-            }
-        }
     }
+}
 
-    function initConfigs(){
-        lengthPrice = Number( configs.find( el =>  el.name == 'lengthPrice').value )
-		calcBaseFont = Number(  configs.find( el =>  el.name == 'calcBaseFont').value )
-		board_padding_mm = Number(  configs.find( el =>  el.name == 'board_padding_mm').value )
-        calcСoefficientLength = Number(  configs.find( el =>  el.name == 'calcСoefficientLength').value )
-        minSumm = Number(  configs.find( el =>  el.name == 'minSumm').value )
-    }
+function initConfigs(){
+    lengthPrice = Number( configs.find( el =>  el.name == 'lengthPrice').value )
+    calcBaseFont = Number(  configs.find( el =>  el.name == 'calcBaseFont').value )
+    board_padding_mm = Number(  configs.find( el =>  el.name == 'board_padding_mm').value )
+    calcСoefficientLength = Number(  configs.find( el =>  el.name == 'calcСoefficientLength').value )
+    minSumm = Number(  configs.find( el =>  el.name == 'minSumm').value )
+}
 
-    function initTextImput(){
-        ready_t_element( '[name="text_board"]', ()=>{
-            $('[name="text_board"]').on( 'input', async function(){
-                text_board = $(this).val()
-                if(borderHorizont){
-                    $('[name="board_size"]').val( getHorizontalBoardWith() / 10 )
-                }else{
-                    $('[name="board_size"]').val( getVerticaltBoardHieght() / 10 )
-                }
-                calcBoard()
-                renderCanvas()
-            })
-            $('[name="text_board"]').val(text_board)
-        })
-    }
-
-    function initZommPanel(){
-        $('.btn_zoom_plus').click(()=>{
-            let carentSeize = Math.round( Number( $('[name="board_size"]').val() ) )
-            if( carentSeize == 0) carentSeize = getBoardSize() / 10
-            $('[name="board_size"]').val( Math.round( carentSeize + zoomGap ) )
-            calcBoard()
-            renderCanvas()
-        })
-        $('.btn_zoom_minus').click(()=>{
-            let carentSeize = Math.round( Number( $('[name="board_size"]').val() ) )
-            let minSize = getBoardSize() / 10
-            if( carentSeize == 0) carentSeize = minSize
-            if(Math.round( carentSeize - zoomGap ) < minSize) return false
-            $('[name="board_size"]').val( Math.round( carentSeize - zoomGap ) )
-            calcBoard()
-            renderCanvas()
-        })
-        $('.btn_zoom_reset').click(()=>{
-            carentSeize = getBoardSize() / 10
-            $('[name="board_size"]').val( carentSeize )
-            calcBoard()
-            renderCanvas()
-        })
-
-    }
-
-    function initMovePanel(){
-        $('.btn_move_plus').click(()=>{
+function initTextImput(){
+    ready_t_element( '[name="text_board"]', ()=>{
+        $('[name="text_board"]').on( 'input', async function(){
+            text_board = $(this).val()
             if(borderHorizont){
-                moveText = moveText + moveGap_x;
+                $('[name="board_size"]').val( getHorizontalBoardWith() / 10 )
             }else{
-                let next_y = (canvas.height - textCorrectionBG.border_bottom)/2  + moveText + textCorrectionBG.top + heightVeticalText(text_board, verticalGap)/2  + moveGap_y
-                if(next_y < canvas.height - textCorrectionBG.border_bottom ) moveText = moveText + moveGap_y;
+                $('[name="board_size"]').val( getVerticaltBoardHieght() / 10 )
             }
-            renderCanvas()
-        })
-        $('.btn_move_minus').click(()=>{
-            if(borderHorizont){
-                moveText = moveText - moveGap_x;
-            }else{
-                let next_y = (canvas.height - textCorrectionBG.border_bottom)/2  + moveText + textCorrectionBG.top - heightVeticalText(text_board, verticalGap)/2  - moveGap_y
-                if ( next_y > 0) moveText = moveText - moveGap_y;
-            }
-            renderCanvas()
-        })
-        $('.btn_move_reset').click(()=>{
-            moveText=0;
-            renderCanvas()
-        })
-    }
-
-    async function initData(){
-        configs = await ajaxReq(URL_CONFIGS, AJAX_OPTIONS, {})
-        symbols = await ajaxReq(URL_SYMBOLS, AJAX_OPTIONS, {})
-        fonts = await ajaxReq(URL_FONTS, AJAX_OPTIONS, {})
-        return true
-    }
-
-    function iniStopSub(){
-        $('.no_submit .tn-form__submit, .border_orintation_panel .tn-form__submit').on( "click", function( event ) {
-            event.stopPropagation();    
-        });
-    }
-
-    async function initFontsPanel(){
-        
-        for(let i=1;i<=10;i++){
-            let fontName = fonts[i-1].name
-            let font = fonts[i-1]
-            $(`.btn_font_${i}`).addClass('btn_font')
-            $(`.btn_font_${i}`).attr({'font':fontName.split('.')[0]})
-            $(`.btn_font_${i} .tn-atom`).text(fontName.split('.')[0])
-            $(`.btn_font_${i}`).attr({'font_base_size':font.baseSize})
-        }
-        $('.btn_font').click(function(){
-            $('.btn_font').removeClass('btn_font_selected')
-            $(this).addClass('btn_font_selected')
-            selectedFont = $(this).attr('font')
-            textBaseSize = $(this).attr('font_base_size')
             calcBoard()
             renderCanvas()
         })
-        $('.btn_font_1').click()
+        $('[name="text_board"]').val(text_board)
+    })
+}
 
-        fonts.forEach(async function(el){
-            let fontFace = new FontFace(el.name.split(".")[0], `url(${URL_FONTS_FILE}?font=${el.name})`)
-            await fontFace.load().then(function(font){
-                //console.log('font ready');
-                document.fonts.add(font);
-                font_files.push(fontFace)
-            });
-        })
-    }
-
-    function initColorPanel(){
-        def_tetle_select_color = $('.tetle_select_color .tn-atom').text()
-        for(let i=0;i<=14;i++){
-            $(`.select_color_${i}`).addClass('select_color')
-            $(`.btn_color_${i}`).addClass('btn_color')
-            $(`.btn_color_${i}`).attr({'indexColor':i})
-            let colorName =  $(`.btn_color_${i} .tn-atom`).attr('href') 
-            colorName = colorName?colorName.split("#")[1]:''
-            let tooltip = `<div class='tooltip'>${colorName}</div>`
-            $(`.btn_color_${i}`).append(tooltip)
-        }
-        
-        $('.btn_color').click(function(){
-            $(`.select_color`).css({'opacity':'0.0'})
-            indexColor = $(this).attr('indexColor')
-            $(`.select_color_${indexColor}`).css({'opacity':'1.0'})
-            selctedColor = $(`.btn_color_${indexColor} .tn-atom`).css('background-color')
-            selctedColorBright = $(`.bright_color_${indexColor} .tn-atom`).css('background-color')
-            selctedColorDark = $(`.dark_color_${indexColor} .tn-atom`).css('background-color')
-            selctedColorName = $(`.btn_color_${indexColor} .tn-atom`).attr('href').split("#")[1]
-            imgBGSelect()
-            //$('.selctedColor .tn-atom').text(selctedColorName)
-            //$('.selctedColor .tn-atom').css({'color':selctedColor})
-            $('.tetle_select_color .tn-atom').text(`${def_tetle_select_color} ${selctedColorName}`)
-            renderCanvas()
-        })
-
-        $('.btn_color').on( "mouseenter", function(event){
-            $(this).find('.tooltip').addClass('visible')
-            let color = $(this).find('.tn-atom').css('background-color')
-            $(this).find('.tooltip').css({'box-shadow': `0 0px 33px 9px ${color}`});
-            $(this).find('.tooltip').css({'border': `2px solid  ${color}`});
-        }).on( "mouseleave", function(event){
-            $(this).find('.tooltip').removeClass('visible')
-        });
-
-        $('.tooltip').on( "mouseenter", function(event){
-            event.stopPropagation();
-        })
-
-        $('.btn_color_4').click()
-    }
-
-    function initBorderOrintation(){
-        ready_t_element( '.border_orintation_panel', ()=>{
-            border_orintation_action()
-            $('.t-input-group').click(function(){
-                border_orintation_action()
-                moveText=0;
-                zoom=0;
-            })
-        })
-    }
-
-    function border_orintation_action(){
-        if($('[value="Горизонтальная"]').is(':checked')){
-            $('[value="Горизонтальная"]').parent().find('span').css({'color':'#fff'})
-            borderHorizont = true
-            $('.ar_left, .ar_right').css({'opacity':1.0})
-            $('.ar_down, .ar_up').css({'opacity':0.01})
-        }else{
-            $('[value="Горизонтальная"]').parent().find('span').css({'color':'#555'})
-            borderHorizont = false
-            $('.ar_left, .ar_right').css({'opacity':0.01})
-            $('.ar_down, .ar_up').css({'opacity':1.0})
-        }
-        if($('[value="Вертикальная"]').is(':checked')){
-            $('[value="Вертикальная"]').parent().find('span').css({'color':'#fff'})
-        }else{
-            $('[value="Вертикальная"]').parent().find('span').css({'color':'#555'})
-        }
-        
+function initZommPanel(){
+    $('.btn_zoom_plus').click(()=>{
+        let carentSeize = Math.round( Number( $('[name="board_size"]').val() ) )
+        if( carentSeize == 0) carentSeize = getBoardSize() / 10
+        $('[name="board_size"]').val( Math.round( carentSeize + zoomGap ) )
         calcBoard()
         renderCanvas()
-    }
+    })
+    $('.btn_zoom_minus').click(()=>{
+        let carentSeize = Math.round( Number( $('[name="board_size"]').val() ) )
+        let minSize = getBoardSize() / 10
+        if( carentSeize == 0) carentSeize = minSize
+        if(Math.round( carentSeize - zoomGap ) < minSize) return false
+        $('[name="board_size"]').val( Math.round( carentSeize - zoomGap ) )
+        calcBoard()
+        renderCanvas()
+    })
+    $('.btn_zoom_reset').click(()=>{
+        carentSeize = getBoardSize() / 10
+        $('[name="board_size"]').val( carentSeize )
+        calcBoard()
+        renderCanvas()
+    })
 
-    function intSizeBoardPanel(){
-        ready_t_element('[name="board_size"]', ()=>{ 
-            $('[name="board_size"]').attr({'type':'number'})
-            calcHorizontBoard()
-            $('[name="board_size"]').on("change", function(){
-                if(panel_board_seize_stop_change) return false
-                calcBoard()
-                renderCanvas()
-            })
-            $('[name="board_size"]').on("input", function(){
-                let max = Number($('.max_size_title .tn-atom').text())
-                //let min = Number($('.min_size_title .tn-atom').text())
-                if( $(this).val() > max ){ $(this).val(max); t1093__processCurrentPopupOnShow('#moreSize') }
-                //if( $(this).val() < min ) $(this).val(min)
-            })
-        })
-    }
+}
 
-    function intSendForm(){
-        $('.btn_submit_form').click(()=>{
-            $('.send_form .t-submit').click()
-        })
+function initMovePanel(){
+    $('.btn_move_plus').click(()=>{
+        if(borderHorizont){
+            moveText = moveText + moveGap_x;
+        }else{
+            let next_y = (canvas.height - textCorrectionBG.border_bottom)/2  + moveText + textCorrectionBG.top + heightVeticalText(text_board, verticalGap)/2  + moveGap_y
+            if(next_y < canvas.height - textCorrectionBG.border_bottom ) moveText = moveText + moveGap_y;
+        }
+        renderCanvas()
+    })
+    $('.btn_move_minus').click(()=>{
+        if(borderHorizont){
+            moveText = moveText - moveGap_x;
+        }else{
+            let next_y = (canvas.height - textCorrectionBG.border_bottom)/2  + moveText + textCorrectionBG.top - heightVeticalText(text_board, verticalGap)/2  - moveGap_y
+            if ( next_y > 0) moveText = moveText - moveGap_y;
+        }
+        renderCanvas()
+    })
+    $('.btn_move_reset').click(()=>{
+        moveText=0;
+        renderCanvas()
+    })
+}
+
+async function initData(){
+    configs = await ajaxReq(URL_CONFIGS, AJAX_OPTIONS, {})
+    symbols = await ajaxReq(URL_SYMBOLS, AJAX_OPTIONS, {})
+    fonts = await ajaxReq(URL_FONTS, AJAX_OPTIONS, {})
+    return true
+}
+
+function iniStopSub(){
+    $('.no_submit .tn-form__submit, .border_orintation_panel .tn-form__submit').on( "click", function( event ) {
+        event.stopPropagation();    
+    });
+}
+
+async function initFontsPanel(){
+    
+    for(let i=1;i<=10;i++){
+        let fontName = fonts[i-1].name
+        let font = fonts[i-1]
+        $(`.btn_font_${i}`).addClass('btn_font')
+        $(`.btn_font_${i}`).attr({'font':fontName.split('.')[0]})
+        $(`.btn_font_${i} .tn-atom`).text(fontName.split('.')[0])
+        $(`.btn_font_${i}`).attr({'font_base_size':font.baseSize})
     }
+    $('.btn_font').click(function(){
+        $('.btn_font').removeClass('btn_font_selected')
+        $(this).addClass('btn_font_selected')
+        selectedFont = $(this).attr('font')
+        textBaseSize = $(this).attr('font_base_size')
+        calcBoard()
+        renderCanvas()
+    })
+    $('.btn_font_1').click()
+
+    fonts.forEach(async function(el){
+        let fontFace = new FontFace(el.name.split(".")[0], `url(${URL_FONTS_FILE}?font=${el.name})`)
+        await fontFace.load().then(function(font){
+            //console.log('font ready');
+            document.fonts.add(font);
+            font_files.push(fontFace)
+        });
+    })
+}
+
+function initColorPanel(){
+    def_tetle_select_color = $('.tetle_select_color .tn-atom').text()
+    for(let i=0;i<=14;i++){
+        $(`.select_color_${i}`).addClass('select_color')
+        $(`.btn_color_${i}`).addClass('btn_color')
+        $(`.btn_color_${i}`).attr({'indexColor':i})
+        let colorName =  $(`.btn_color_${i} .tn-atom`).attr('href') 
+        colorName = colorName?colorName.split("#")[1]:''
+        let tooltip = `<div class='tooltip'>${colorName}</div>`
+        $(`.btn_color_${i}`).append(tooltip)
+    }
+    
+    $('.btn_color').click(function(){
+        $(`.select_color`).css({'opacity':'0.0'})
+        indexColor = $(this).attr('indexColor')
+        $(`.select_color_${indexColor}`).css({'opacity':'1.0'})
+        selctedColor = $(`.btn_color_${indexColor} .tn-atom`).css('background-color')
+        selctedColorBright = $(`.bright_color_${indexColor} .tn-atom`).css('background-color')
+        selctedColorDark = $(`.dark_color_${indexColor} .tn-atom`).css('background-color')
+        selctedColorName = $(`.btn_color_${indexColor} .tn-atom`).attr('href').split("#")[1]
+        imgBGSelect()
+        //$('.selctedColor .tn-atom').text(selctedColorName)
+        //$('.selctedColor .tn-atom').css({'color':selctedColor})
+        $('.tetle_select_color .tn-atom').text(`${def_tetle_select_color} ${selctedColorName}`)
+        renderCanvas()
+    })
+
+    $('.btn_color').on( "mouseenter", function(event){
+        $(this).find('.tooltip').addClass('visible')
+        let color = $(this).find('.tn-atom').css('background-color')
+        $(this).find('.tooltip').css({'box-shadow': `0 0px 33px 9px ${color}`});
+        $(this).find('.tooltip').css({'border': `2px solid  ${color}`});
+    }).on( "mouseleave", function(event){
+        $(this).find('.tooltip').removeClass('visible')
+    });
+
+    $('.tooltip').on( "mouseenter", function(event){
+        event.stopPropagation();
+    })
+
+    $('.btn_color_4').click()
+}
+
+function initBorderOrintation(){
+    ready_t_element( '.border_orintation_panel', ()=>{
+        border_orintation_action()
+        $('.t-input-group').click(function(){
+            border_orintation_action()
+            moveText=0;
+            zoom=0;
+        })
+    })
+}
+
+function border_orintation_action(){
+    if($('[value="Горизонтальная"]').is(':checked')){
+        $('[value="Горизонтальная"]').parent().find('span').css({'color':'#fff'})
+        borderHorizont = true
+        $('.ar_left, .ar_right').css({'opacity':1.0})
+        $('.ar_down, .ar_up').css({'opacity':0.01})
+    }else{
+        $('[value="Горизонтальная"]').parent().find('span').css({'color':'#555'})
+        borderHorizont = false
+        $('.ar_left, .ar_right').css({'opacity':0.01})
+        $('.ar_down, .ar_up').css({'opacity':1.0})
+    }
+    if($('[value="Вертикальная"]').is(':checked')){
+        $('[value="Вертикальная"]').parent().find('span').css({'color':'#fff'})
+    }else{
+        $('[value="Вертикальная"]').parent().find('span').css({'color':'#555'})
+    }
+    
+    calcBoard()
+    renderCanvas()
+}
+
+function intSizeBoardPanel(){
+    ready_t_element('[name="board_size"]', ()=>{ 
+        $('[name="board_size"]').attr({'type':'number'})
+        calcHorizontBoard()
+        $('[name="board_size"]').on("change", function(){
+            if(panel_board_seize_stop_change) return false
+            calcBoard()
+            renderCanvas()
+        })
+        $('[name="board_size"]').on("input", function(){
+            let max = Number($('.max_size_title .tn-atom').text())
+            //let min = Number($('.min_size_title .tn-atom').text())
+            if( $(this).val() > max ){ $(this).val(max); t1093__processCurrentPopupOnShow('#moreSize') }
+            //if( $(this).val() < min ) $(this).val(min)
+        })
+    })
+}
+
+function intSendForm(){
+    $('.btn_submit_form').click(()=>{
+        $('.send_form .t-submit').click()
+    })
+}
 
 // -------------------------------------------  Render Functions ------------------------------------------------------
-    function renderCanvas(){
-        selectBG()
-        textCorrectionBGSelect()
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
-        if(borderHorizont){ horizontalBoard() }else{ verticalBoard() }
+
+function renderCanvas(){
+    selectBG()
+    textCorrectionBGSelect()
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    if(borderHorizont){ horizontalBoard() }else{ verticalBoard() }
+}
+
+function horizontalBoard(){
+    ajastWidthText()
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    renderBG(()=>{
+        fillTextLayers()
+    })
+
+}
+
+function imgBGSelect(){
+    let baseClass = classesImgBG[selectImgBG - 1].base
+    let front = classesImgBG[selectImgBG - 1].front
+    urlBG_img = $(`.${baseClass}${indexColor} .tn-atom__img`).attr('src')
+    urlBG_img_front_layer = $(`.${front}${indexColor} .tn-atom__img`).attr('src')
+}
+
+function textCorrectionBGSelect(){
+    let selectedDataBG = textCorrectionBG_Images[selectImgBG - 1]
+    if(borderHorizont){
+        textCorrectionBG.top = selectedDataBG.top_horizont
+    }else{
+        textCorrectionBG.top = selectedDataBG.top_vertical        
     }
+    textCorrectionBG.border_bottom = selectedDataBG.border_bottom
+    textCorrectionBG.scale_p_mm = selectedDataBG.scale_p_mm
+    zoomGap = selectedDataBG.zoomGap
+}
 
-    function horizontalBoard(){
-        ajastWidthText()
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        renderBG(()=>{
-            fillTextLayers()
-        })
-
+function selectBG(){
+    if( getHorizontalBoardWith(calcFontSize) > swithcBoard.wide || getVerticaltBoardHieght(calcFontSize) > swithcBoard.heigth  ){ 
+        selectImgBG = 2 
+    }else{ 
+        selectImgBG = 1 
     }
+    imgBGSelect()
+}
 
-    function imgBGSelect(){
-        let baseClass = classesImgBG[selectImgBG - 1].base
-        let front = classesImgBG[selectImgBG - 1].front
-        urlBG_img = $(`.${baseClass}${indexColor} .tn-atom__img`).attr('src')
-        urlBG_img_front_layer = $(`.${front}${indexColor} .tn-atom__img`).attr('src')
+function getTextSize(){
+    return Number(textBaseSize) + Number(textCorrectionBG.correction) + Number(zoom)
+}
+
+function ajastSizeText(){
+    canvasTextSize = calcFontSize * k_px_mm / textCorrectionBG.scale_p_mm
+    if(canvasTextSize==0){
+        canvasTextSize = getMinFontSize()  * k_px_mm / textCorrectionBG.scale_p_mm
     }
+}
 
-    function textCorrectionBGSelect(){
-        let selectedDataBG = textCorrectionBG_Images[selectImgBG - 1]
-        if(borderHorizont){
-            textCorrectionBG.top = selectedDataBG.top_horizont
-        }else{
-            textCorrectionBG.top = selectedDataBG.top_vertical        
-        }
-        textCorrectionBG.border_bottom = selectedDataBG.border_bottom
-        textCorrectionBG.scale_p_mm = selectedDataBG.scale_p_mm
-        zoomGap = selectedDataBG.zoomGap
-    }
+function ajastWidthText(){
+    ajastSizeText()
+    ctx.font = `${canvasTextSize}px ${selectedFont}`
+}
 
-    function selectBG(){
-        if( getHorizontalBoardWith(calcFontSize) > swithcBoard.wide || getVerticaltBoardHieght(calcFontSize) > swithcBoard.heigth  ){ 
-            selectImgBG = 2 
-        }else{ 
-            selectImgBG = 1 
-        }
-        imgBGSelect()
-    }
-
-    function getTextSize(){
-       return Number(textBaseSize) + Number(textCorrectionBG.correction) + Number(zoom)
-    }
-
-    function ajastSizeText(){
-        canvasTextSize = calcFontSize * k_px_mm / textCorrectionBG.scale_p_mm
-        if(canvasTextSize==0){
-            canvasTextSize = getMinFontSize()  * k_px_mm / textCorrectionBG.scale_p_mm
-        }
-    }
-
-    function ajastWidthText(){
-        ajastSizeText()
-        ctx.font = `${canvasTextSize}px ${selectedFont}`
-    }
-
-    function ajastWidthText_(){
-        let textWidth, textSize, maxTextWidth = canvas.width
-        textSize = getTextSize()
-        ctx.font = `${textSize}px ${selectedFont}`
+function ajastWidthText_(){
+    let textWidth, textSize, maxTextWidth = canvas.width
+    textSize = getTextSize()
+    ctx.font = `${textSize}px ${selectedFont}`
+    textWidth = ctx.measureText(text_board).width
+    textHeight = ctx.measureText(text_board).hangingBaseline
+    while( textWidth > maxTextWidth){
+        ctx.font = `${textSize}px ${selectedFont}`;
         textWidth = ctx.measureText(text_board).width
-        textHeight = ctx.measureText(text_board).hangingBaseline
-        while( textWidth > maxTextWidth){
-            ctx.font = `${textSize}px ${selectedFont}`;
-            textWidth = ctx.measureText(text_board).width
-            textSize--
-        }
-        canvasTextSize = textSize
+        textSize--
     }
+    canvasTextSize = textSize
+}
 
-    function verticalBoard(){
-        ajastVerticalText()
-        renderBG(()=>{
-            fillTextLayers()
-        })
-    }
+function verticalBoard(){
+    ajastVerticalText()
+    renderBG(()=>{
+        fillTextLayers()
+    })
+}
 
-    function ajastVerticalText(){
-        ajastSizeText()
-        ctx.font = `${canvasTextSize}px ${selectedFont}`     
-    }
+function ajastVerticalText(){
+    ajastSizeText()
+    ctx.font = `${canvasTextSize}px ${selectedFont}`     
+}
 
-    function ajastVerticalText_(){
-        let maxTextHegth = canvas.height - textCorrectionBG.border_bottom
-        textSize =  Number(textBaseSize) + Number(zoom)
-        ctx.font = `${textSize}px ${selectedFont}`
+function ajastVerticalText_(){
+    let maxTextHegth = canvas.height - textCorrectionBG.border_bottom
+    textSize =  Number(textBaseSize) + Number(zoom)
+    ctx.font = `${textSize}px ${selectedFont}`
+    textHeight = heightVeticalText(text_board, verticalGap)
+    while( textHeight > maxTextHegth ){
+        ctx.font = `${textSize}px ${selectedFont}`;
         textHeight = heightVeticalText(text_board, verticalGap)
-        while( textHeight > maxTextHegth ){
-            ctx.font = `${textSize}px ${selectedFont}`;
-            textHeight = heightVeticalText(text_board, verticalGap)
-            textSize--
-        }
+        textSize--
     }
+}
 
-    async function renderBG(callback){
-        imgBG.src = urlBG_img 
-        await imgBG.onload 
-        await ctx.drawImage(imgBG, 0, 0);
-        await callback()
-        imgBGLayerFront.src = urlBG_img_front_layer
-        await imgBGLayerFront.onload 
-        await ctx.drawImage(imgBGLayerFront, 0, 0);
-    }
+async function renderBG(callback){
+    imgBG.src = urlBG_img 
+    await imgBG.onload 
+    await ctx.drawImage(imgBG, 0, 0);
+    await callback()
+    imgBGLayerFront.src = urlBG_img_front_layer
+    await imgBGLayerFront.onload 
+    await ctx.drawImage(imgBGLayerFront, 0, 0);
+}
 
-    function fillTextLayers(){
-        fillTextLayer( 80, 80, selctedColorDark)
-        fillTextLayer( 12, 40, selctedColorDark)
-        fillTextLayer( 8, 3, selctedColorDark)
-        fillTextLayer( 0, 0, selctedColorBright)
-        // let avgTextSize = canvasTextSize 
-        // fillTextLayer( avgTextSize * 1.6, avgTextSize * 1.6, selctedColorDark)
-        // fillTextLayer( avgTextSize * 0.24, avgTextSize * 0.8, selctedColorDark)
-        // fillTextLayer( avgTextSize * 0.16, avgTextSize * 0.06, selctedColorDark)
-        // fillTextLayer( 0, 0, selctedColorBright)
-    }
+function fillTextLayers(){
+    fillTextLayer( 80, 80, selctedColorDark)
+    fillTextLayer( 12, 40, selctedColorDark)
+    fillTextLayer( 8, 3, selctedColorDark)
+    fillTextLayer( 0, 0, selctedColorBright)
+    // let avgTextSize = canvasTextSize 
+    // fillTextLayer( avgTextSize * 1.6, avgTextSize * 1.6, selctedColorDark)
+    // fillTextLayer( avgTextSize * 0.24, avgTextSize * 0.8, selctedColorDark)
+    // fillTextLayer( avgTextSize * 0.16, avgTextSize * 0.06, selctedColorDark)
+    // fillTextLayer( 0, 0, selctedColorBright)
+}
 
-    function fillTextLayer( strokeWidth, blur, color ){
-        let useStroke = false
-        if(strokeWidth>0) useStroke = true 
-        ctx.fillStyle = color;
-        ctx.strokeStyle = color;
-        ctx.lineWidth = strokeWidth
-        ctx.filter = `blur(${blur}px)`;
-        if(borderHorizont){
-            ctx.fillText(text_board, canvas.width/2  + moveText, (canvas.height - textCorrectionBG.border_bottom)/2  + textCorrectionBG.top);
-            if( useStroke ) ctx.strokeText(text_board, canvas.width/2 + moveText, (canvas.height - textCorrectionBG.border_bottom)/2 + textCorrectionBG.top);   
+function fillTextLayer( strokeWidth, blur, color ){
+    let useStroke = false
+    if(strokeWidth>0) useStroke = true 
+    ctx.fillStyle = color;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = strokeWidth
+    ctx.filter = `blur(${blur}px)`;
+    if(borderHorizont){
+        ctx.fillText(text_board, canvas.width/2  + moveText, (canvas.height - textCorrectionBG.border_bottom)/2  + textCorrectionBG.top);
+        if( useStroke ) ctx.strokeText(text_board, canvas.width/2 + moveText, (canvas.height - textCorrectionBG.border_bottom)/2 + textCorrectionBG.top);   
+    }else{
+        if( ifOverSizeTextToBG() ){
+            let heigthText = heightVeticalText(text_board, verticalGap)
+            let correction = heigthText - (canvas.height - textCorrectionBG.border_bottom)
+            correction = correction/2 + 15
+            ctx.fillVerticalText(text_board, canvas.width/2, (canvas.height - textCorrectionBG.border_bottom)/2 - correction + textCorrectionBG.top , 5, useStroke);
         }else{
-            if( ifOverSizeTextToBG() ){
-                let heigthText = heightVeticalText(text_board, verticalGap)
-                let correction = heigthText - (canvas.height - textCorrectionBG.border_bottom)
-                correction = correction/2 + 15
-                ctx.fillVerticalText(text_board, canvas.width/2, (canvas.height - textCorrectionBG.border_bottom)/2 - correction + textCorrectionBG.top , 5, useStroke);
-            }else{
-                ctx.fillVerticalText(text_board, canvas.width/2, (canvas.height - textCorrectionBG.border_bottom)/2  + moveText + textCorrectionBG.top, 5, useStroke);
-            }
-            
+            ctx.fillVerticalText(text_board, canvas.width/2, (canvas.height - textCorrectionBG.border_bottom)/2  + moveText + textCorrectionBG.top, 5, useStroke);
         }
+        
     }
+}
+
 // -------------------------------------------  Calc Functions ------------------------------------------------------
 
 async function calcBoard(){
@@ -782,7 +784,6 @@ function renderCalcResult(width, height, summ){
     board_heigth = height
 }
 
-
 function fillSendForm(){
     $('[name=send_form_text]').val(text_board)
     $('[name=send_form_font]').val(selectedFont)
@@ -793,42 +794,41 @@ function fillSendForm(){
     $('[name=send_form_price]').val(`${summ} р.`)   
 }
 
-
 // -------------------------------------------  Suport Functions ------------------------------------------------------
 
-    function ifOverSizeTextToBG(){
-        if(selectImgBG == 2 && !borderHorizont ){
-            if(canvas.height - textCorrectionBG_Images[1].border_bottom < heightVeticalText(text_board, verticalGap) + 30) return true
-        }
-        return false
+function ifOverSizeTextToBG(){
+    if(selectImgBG == 2 && !borderHorizont ){
+        if(canvas.height - textCorrectionBG_Images[1].border_bottom < heightVeticalText(text_board, verticalGap) + 30) return true
     }
+    return false
+}
 
-    function heightVeticalText(text,verticalSpacing){
-        let heightVeticalText = 0
-        for (var i = 0; i < text.length; i++){
-            metrics = ctx.measureText(text[i]);
-            heightVeticalText = heightVeticalText + metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent + verticalSpacing
-            if(text[i]==" ") heightVeticalText = heightVeticalText + verticalSpacing * 5
-        }     
-        return heightVeticalText
-    }
+function heightVeticalText(text,verticalSpacing){
+    let heightVeticalText = 0
+    for (var i = 0; i < text.length; i++){
+        metrics = ctx.measureText(text[i]);
+        heightVeticalText = heightVeticalText + metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent + verticalSpacing
+        if(text[i]==" ") heightVeticalText = heightVeticalText + verticalSpacing * 5
+    }     
+    return heightVeticalText
+}
 
-    function ready_t_element(css_selector, action){
-        let id_timer = setInterval(()=>{
-            if($(css_selector).length > 0){
-                action()
-                clearInterval( id_timer )
-            } 
-        }, 300)
-    }
+function ready_t_element(css_selector, action){
+    let id_timer = setInterval(()=>{
+        if($(css_selector).length > 0){
+            action()
+            clearInterval( id_timer )
+        } 
+    }, 300)
+}
 
-	async function ajaxReq(url, options, content){
-        let response = await fetch(url,{
-            method: options.type,
-            headers: options.heders,
-            body: JSON.stringify(content)
-        })
-        return await response.json();
-    }
-    
+async function ajaxReq(url, options, content){
+    let response = await fetch(url,{
+        method: options.type,
+        headers: options.heders,
+        body: JSON.stringify(content)
+    })
+    return await response.json();
+}
+
 </script>
