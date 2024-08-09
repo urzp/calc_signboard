@@ -8,6 +8,12 @@
     .btn_font .tn-atom:hover, .btn_more_size .tn-atom:hover, .t-radio__indicator:hover, .btn_submit_form .tn-atom:hover{
         box-shadow: 0 0 33px 9px #78ddf4;
     }
+    .btn_move_plus .tn-atom:hover, .btn_move_reset .tn-atom:hover, .btn_move_minus .tn-atom:hover{
+        box-shadow: 0 0 33px 9px #78ddf4;
+    }
+    .btn_zoom_plus .tn-atom:hover, .btn_zoom_reset .tn-atom:hover, .btn_zoom_minus .tn-atom:hover{
+        box-shadow: 0 0 33px 9px #78ddf4;
+    }
     .btn_font_selected .tn-atom{
         color: #fff!important;
         border-color: #78ddf4!important;
@@ -453,10 +459,15 @@ function textCorrectionBGSelect(){
 }
 
 function selectBG(){
-    if( getHorizontalBoardWith(calcFontSize) > swithcBoard.wide || getVerticaltBoardHieght(calcFontSize) > swithcBoard.heigth  ){ 
-        selectImgBG = 2 
-    }else{ 
-        selectImgBG = 1 
+    let w = getHorizontalBoardWith(calcFontSize)
+    let h = getVerticaltBoardHieght(calcFontSize)
+    if(borderHorizont){
+        if(  w > swithcBoard.wide ){ selectImgBG = 2 }else{ selectImgBG = 1 }
+    }else{
+        if( h > swithcBoard.heigth ){ selectImgBG = 2 }else{ selectImgBG = 1 }
+    }
+    if(text_board.length == 1){
+        if( w > swithcBoard.wide ||  h > swithcBoard.heigth ){ selectImgBG = 2 }else{ selectImgBG = 1 }
     }
     imgBGSelect()
 }
