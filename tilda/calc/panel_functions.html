@@ -207,9 +207,13 @@ function initTextImput(){
 
 function initZommPanel(){
     $('.btn_zoom_plus').click(()=>{
+        let maxWidthBoard = getHorizontalBoardWith( getMaxFontSize() )
+        maxWidthBoard = Math.round( maxWidthBoard/100 ) * 10
         let carentSeize = Math.round( Number( $('[name="board_size"]').val() ) )
         if( carentSeize == 0) carentSeize = getBoardSize() / 10
-        $('[name="board_size"]').val( Math.round( carentSeize + zoomGap ) )
+        carentSeize = carentSeize + zoomGap
+        if( carentSeize > maxWidthBoard) carentSeize = maxWidthBoard
+        $('[name="board_size"]').val( Math.round( carentSeize ) )
         calcBoard()
         renderCanvas()
     })
@@ -372,6 +376,7 @@ function border_orintation_action(){
     }
     
     calcBoard()
+    fixImputMinSize()
     renderCanvas()
 }
 
@@ -391,6 +396,16 @@ function intSizeBoardPanel(){
             //if( $(this).val() < min ) $(this).val(min)
         })
     })
+}
+
+function fixImputMinSize(){
+    if(!$('[name="board_size"]').val()) return false
+    let val = Number( $('[name="board_size"]').val() )
+    let min = Number( $('.min_size_title .tn-atom').text() )
+    if( val < min ){
+         $('[name="board_size"]').val(min)
+         calcBoard()
+    }
 }
 
 function intSendForm(){
