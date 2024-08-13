@@ -568,9 +568,9 @@ async function renderBG(callback){
         await ctx.drawImage(imgBG, imgCentr_x , 0);
     }
     await callback()
-    // imgBGLayerFront.src = urlBG_img_front_layer
-    // await imgBGLayerFront.onload 
-    // await ctx.drawImage(imgBGLayerFront, 0, 0);
+    imgBGLayerFront.src = urlBG_img_front_layer
+    await imgBGLayerFront.onload 
+    await ctx.drawImage(imgBGLayerFront, 0, 0);
 }
 
 function fillTextLayers(){
